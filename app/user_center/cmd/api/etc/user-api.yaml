@@ -1,0 +1,27 @@
+Name: user-api
+Host: 0.0.0.0
+Port: 1004
+Mode: prod
+
+Cache:
+  - Host: redis:6379
+    Pass: "G62m50oigInCsf"
+    Type: node
+
+
+Database:
+   # 容器的服务名
+    PGDataSource: "host=postgres port=5432 dbname=test_db user=go_zero_pgsql_db_user password=go_zero_pgsql_db_pass sslmode=disable"
+
+# 如果需要，可以添加其他配置项
+# 例如：
+# Redis:
+#   Host: redis:6379
+#   Type: node
+#   Pass:
+
+# Auth:
+#   AccessSecret: your-access-secret
+#   AccessExpire: 3600
+
+# 可以根据需要添加更多配置项

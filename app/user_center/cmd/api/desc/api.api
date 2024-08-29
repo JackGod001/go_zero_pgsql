@@ -1,0 +1,20 @@
+syntax = "v1"
+
+type (
+	GetUserRequest {
+		Id int64 `form:"id"`
+	}
+	GetUserResponse {
+		Username string `json:"username"`
+	}
+)
+
+@server (
+	prefix:  /v1/user-center
+	timeout: 3000s
+)
+service user-api {
+	@handler GetUser
+	get /user (GetUserRequest) returns (GetUserResponse)
+}
+
