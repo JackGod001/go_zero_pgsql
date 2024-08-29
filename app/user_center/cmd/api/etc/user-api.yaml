@@ -1,7 +1,8 @@
 Name: user-api
 Host: 0.0.0.0
 Port: 1004
-Mode: prod
+Mode: pro
+#Mode: pro test pre dev
 
 Cache:
   - Host: redis:6379
