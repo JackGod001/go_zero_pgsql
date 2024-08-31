@@ -22,14 +22,22 @@ go mod tidy
 
 
 
-并发测试
+## 并发测试
+
 ```shell
-wrk -t50 -c50000 -d3s -s wrk.lua http://localhost:8887
-```
-```shell
-# todo
+# go install github.com/rakyll/hey@latest
 # 我们用 hey 工具来进行压测，压测 90 个并发，执行 1 秒
-hey -z 1s -c 90 -q 1 'http://localhost:8888/ping'
+hey -z 1s -c 90 -q 100 'http://localhost:8888/v1/user-center/user?id=1'
+```
+
+## 监控
+### granfana 监控
+依赖于 prometheus
+监控页面常用的监控指标
+```
+
+
+
 ```
 
 

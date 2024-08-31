@@ -4,7 +4,7 @@ networks:
 services:  # 定义服务
   postgres:  # PostgreSQL 服务配置
     image: postgres:13  # 使用 PostgreSQL 13 版本的官方镜像
-    container_name: ${APP_NAME}_postgres  # 设置容器名称,使用环境变量 APP_NAME
+    container_name: ${APP_NAME}_postgres_dev  # 设置容器名称,使用环境变量 APP_NAME
     restart: always  # 容器退出时总是重启
     environment:  # 设置环境变量
       - POSTGRES_USER=${DB_USER}  # 设置 PostgreSQL 用户名
@@ -24,7 +24,7 @@ services:  # 定义服务
       context: .
       # 指向user_center的Dockerfile,这个路径根据上面context: ./app/user_center找到 dockerfile
       dockerfile: ./Dockerfile-dev
-    container_name: ${APP_NAME}_api  # 设置容器名称,使用环境变量 APP_NAME
+    container_name: ${APP_NAME}_api_dev  # 设置容器名称,使用环境变量 APP_NAME
     environment:  # 设置环境变量
       - TZ=Asia/Shanghai  # 设置时区为上海
       - GOPROXY=https://goproxy.cn,direct  # 设置 Go 代理
@@ -53,14 +53,13 @@ services:  # 定义服务
       - "2345:2345"  # 将容器的 2345 端口映射到主机的 2345 端口
     depends_on:  # 依赖关系
       - postgres  # 依赖于 postgres 服务
+      - redis
     #   在运行时会覆盖Dockerfile中写的CMD代码
     command: /bin/sh -c "pwd && echo 'Current directory contents:' && ls -la && echo 'Executing modd:' && modd"
 
-
-
   gateway:  # Nginx 网关服务配置
     image: nginx:1.21.5  # 使用 Nginx 1.21.5 版本的官方镜像
-    container_name: ${APP_NAME}_nginx-gateway  # 设置容器名称,使用环境变量 APP_NAME
+    container_name: ${APP_NAME}_nginx_dev  # 设置容器名称,使用环境变量 APP_NAME
     restart: always  # 容器退出时总是重启
     environment:  # 设置环境变量
       - TZ=Asia/Shanghai  # 设置时区为上海
@@ -76,7 +75,7 @@ services:  # 定义服务
 #  redis:
 #    # 底层也是redis 还按照redis使用方式即可
 #    image: pikadb/pika
-#    container_name: ${APP_NAME}_pikadb
+#    container_name: ${APP_NAME}_dev_pikadb
 #    ports:
 #      # 6379注意配置文件中要一致
 #      - "${REDIS_EXPOSE_PORT}:6379"
@@ -98,7 +97,7 @@ services:  # 定义服务
 #      - go_zero_pgsql
   redis:
     image: redis:6.2.5
-    container_name: ${APP_NAME}_redis
+    container_name: ${APP_NAME}_dev_redis
     ports:
       - "${REDIS1_EXPOSE_PORT}:${REDIS1_PORT}"
     environment:
@@ -112,10 +111,10 @@ services:  # 定义服务
     networks:
       - go_zero_pgsql
   #prometheus监控 — Prometheus for monitoring
-
+  # http://127.0.0.1:9090
   prometheus:
     image: prom/prometheus:v2.28.1
-    container_name: ${APP_NAME}_prometheus
+    container_name: ${APP_NAME}_dev_prometheus
     environment:
       # 时区上海 - Time zone Shanghai (Change if needed)
       TZ: Asia/Shanghai
@@ -134,11 +133,13 @@ services:  # 定义服务
       - 9090:9090
     networks:
       - go_zero_pgsql
-
+    depends_on:  # 依赖关系
+      - api  # 依赖于 api 服务
   #查看prometheus监控数据 - Grafana to view Prometheus monitoring data
+#Grafana: http://127.0.0.1:3001/  ， 默认账号、密码都是 admin
   grafana:
     image: grafana/grafana:8.0.6
-    container_name: ${APP_NAME}_grafana
+    container_name: ${APP_NAME}_dev_grafana
     hostname: grafana
     user: root
     environment:
@@ -151,3 +152,6 @@ services:  # 定义服务
       - "3001:3000"
     networks:
       - go_zero_pgsql
+    depends_on: # 依赖关系
+      - api  # 依赖于 api 服务
+      - prometheus

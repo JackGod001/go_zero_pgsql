@@ -11,7 +11,8 @@ scrape_configs:
 
   - job_name: 'user_center-api'
     static_configs:
-      - targets: [ 'go_zero_pgsql_api:4001' ]
+      # 注意是容器服务名,不是容器名
+      - targets: [ 'api:4001' ]
         labels:
           job: user_center-api
           app: user_center-api
