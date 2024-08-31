@@ -22,13 +22,17 @@ var (
 	usersRowsExpectAutoSet   = strings.Join(stringx.Remove(usersFieldNames, "id", "create_at", "create_time", "created_at", "update_at", "update_time", "updated_at"), ",")
 	usersRowsWithPlaceHolder = builder.PostgreSqlJoin(stringx.Remove(usersFieldNames, "id", "create_at", "create_time", "created_at", "update_at", "update_time", "updated_at"))
 
-	cachePublicUsersIdPrefix = "cache:public:users:id:"
+	cachePublicUsersIdPrefix       = "cache:public:users:id:"
+	cachePublicUsersEmailPrefix    = "cache:public:users:email:"
+	cachePublicUsersUsernamePrefix = "cache:public:users:username:"
 )
 
 type (
 	usersModel interface {
 		Insert(ctx context.Context, data *Users) (sql.Result, error)
 		FindOne(ctx context.Context, id int64) (*Users, error)
+		FindOneByEmail(ctx context.Context, email string) (*Users, error)
+		FindOneByUsername(ctx context.Context, username string) (*Users, error)
 		Update(ctx context.Context, data *Users) error
 		Delete(ctx context.Context, id int64) error
 	}
@@ -39,11 +43,12 @@ type (
 	}
 
 	Users struct {
-		Id        int64         `db:"id"`
-		Username  string        `db:"username"`
-		Email     string        `db:"email"`
-		Age       sql.NullInt64 `db:"age"`
-		CreatedAt time.Time     `db:"created_at"`
+		Id           int64     `db:"id"`
+		Username     string    `db:"username"`
+		Email        string    `db:"email"`
+		PasswordHash string    `db:"password_hash"`
+		CreatedAt    time.Time `db:"created_at"`
+		UpdatedAt    time.Time `db:"updated_at"`
 	}
 )
 
@@ -55,11 +60,18 @@ func newUsersModel(conn sqlx.SqlConn, c cache.CacheConf, opts ...cache.Option) *
 }
 
 func (m *defaultUsersModel) Delete(ctx context.Context, id int64) error {
+	data, err := m.FindOne(ctx, id)
+	if err != nil {
+		return err
+	}
+
+	publicUsersEmailKey := fmt.Sprintf("%s%v", cachePublicUsersEmailPrefix, data.Email)
 	publicUsersIdKey := fmt.Sprintf("%s%v", cachePublicUsersIdPrefix, id)
-	_, err := m.ExecCtx(ctx, func(ctx context.Context, conn sqlx.SqlConn) (result sql.Result, err error) {
+	publicUsersUsernameKey := fmt.Sprintf("%s%v", cachePublicUsersUsernamePrefix, data.Username)
+	_, err = m.ExecCtx(ctx, func(ctx context.Context, conn sqlx.SqlConn) (result sql.Result, err error) {
 		query := fmt.Sprintf("delete from %s where id = $1", m.table)
 		return conn.ExecCtx(ctx, query, id)
-	}, publicUsersIdKey)
+	}, publicUsersEmailKey, publicUsersIdKey, publicUsersUsernameKey)
 	return err
 }
 
@@ -80,21 +92,70 @@ func (m *defaultUsersModel) FindOne(ctx context.Context, id int64) (*Users, erro
 	}
 }
 
+func (m *defaultUsersModel) FindOneByEmail(ctx context.Context, email string) (*Users, error) {
+	publicUsersEmailKey := fmt.Sprintf("%s%v", cachePublicUsersEmailPrefix, email)
+	var resp Users
+	err := m.QueryRowIndexCtx(ctx, &resp, publicUsersEmailKey, m.formatPrimary, func(ctx context.Context, conn sqlx.SqlConn, v any) (i any, e error) {
+		query := fmt.Sprintf("select %s from %s where email = $1 limit 1", usersRows, m.table)
+		if err := conn.QueryRowCtx(ctx, &resp, query, email); err != nil {
+			return nil, err
+		}
+		return resp.Id, nil
+	}, m.queryPrimary)
+	switch err {
+	case nil:
+		return &resp, nil
+	case sqlc.ErrNotFound:
+		return nil, ErrNotFound
+	default:
+		return nil, err
+	}
+}
+
+func (m *defaultUsersModel) FindOneByUsername(ctx context.Context, username string) (*Users, error) {
+	publicUsersUsernameKey := fmt.Sprintf("%s%v", cachePublicUsersUsernamePrefix, username)
+	var resp Users
+	err := m.QueryRowIndexCtx(ctx, &resp, publicUsersUsernameKey, m.formatPrimary, func(ctx context.Context, conn sqlx.SqlConn, v any) (i any, e error) {
+		query := fmt.Sprintf("select %s from %s where username = $1 limit 1", usersRows, m.table)
+		if err := conn.QueryRowCtx(ctx, &resp, query, username); err != nil {
+			return nil, err
+		}
+		return resp.Id, nil
+	}, m.queryPrimary)
+	switch err {
+	case nil:
+		return &resp, nil
+	case sqlc.ErrNotFound:
+		return nil, ErrNotFound
+	default:
+		return nil, err
+	}
+}
+
 func (m *defaultUsersModel) Insert(ctx context.Context, data *Users) (sql.Result, error) {
+	publicUsersEmailKey := fmt.Sprintf("%s%v", cachePublicUsersEmailPrefix, data.Email)
 	publicUsersIdKey := fmt.Sprintf("%s%v", cachePublicUsersIdPrefix, data.Id)
+	publicUsersUsernameKey := fmt.Sprintf("%s%v", cachePublicUsersUsernamePrefix, data.Username)
 	ret, err := m.ExecCtx(ctx, func(ctx context.Context, conn sqlx.SqlConn) (result sql.Result, err error) {
 		query := fmt.Sprintf("insert into %s (%s) values ($1, $2, $3)", m.table, usersRowsExpectAutoSet)
-		return conn.ExecCtx(ctx, query, data.Username, data.Email, data.Age)
-	}, publicUsersIdKey)
+		return conn.ExecCtx(ctx, query, data.Username, data.Email, data.PasswordHash)
+	}, publicUsersEmailKey, publicUsersIdKey, publicUsersUsernameKey)
 	return ret, err
 }
 
-func (m *defaultUsersModel) Update(ctx context.Context, data *Users) error {
+func (m *defaultUsersModel) Update(ctx context.Context, newData *Users) error {
+	data, err := m.FindOne(ctx, newData.Id)
+	if err != nil {
+		return err
+	}
+
+	publicUsersEmailKey := fmt.Sprintf("%s%v", cachePublicUsersEmailPrefix, data.Email)
 	publicUsersIdKey := fmt.Sprintf("%s%v", cachePublicUsersIdPrefix, data.Id)
-	_, err := m.ExecCtx(ctx, func(ctx context.Context, conn sqlx.SqlConn) (result sql.Result, err error) {
+	publicUsersUsernameKey := fmt.Sprintf("%s%v", cachePublicUsersUsernamePrefix, data.Username)
+	_, err = m.ExecCtx(ctx, func(ctx context.Context, conn sqlx.SqlConn) (result sql.Result, err error) {
 		query := fmt.Sprintf("update %s set %s where id = $1", m.table, usersRowsWithPlaceHolder)
-		return conn.ExecCtx(ctx, query, data.Id, data.Username, data.Email, data.Age)
-	}, publicUsersIdKey)
+		return conn.ExecCtx(ctx, query, newData.Id, newData.Username, newData.Email, newData.PasswordHash)
+	}, publicUsersEmailKey, publicUsersIdKey, publicUsersUsernameKey)
 	return err
 }
 

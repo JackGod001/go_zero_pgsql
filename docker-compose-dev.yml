@@ -1,0 +1,113 @@
+networks:
+  go_zero_pgsql:
+    driver: bridge
+services:  # 定义服务
+  postgres:  # PostgreSQL 服务配置
+    image: postgres:13  # 使用 PostgreSQL 13 版本的官方镜像
+    container_name: ${APP_NAME}_postgres  # 设置容器名称,使用环境变量 APP_NAME
+    restart: always  # 容器退出时总是重启
+    environment:  # 设置环境变量
+      - POSTGRES_USER=${DB_USER}  # 设置 PostgreSQL 用户名
+      - POSTGRES_PASSWORD=${DB_PASSWORD}  # 设置 PostgreSQL 密码
+      - TZ=Asia/Shanghai  # 设置时区为上海
+    volumes:  # 配置数据卷
+      - ./data/postgres:/var/lib/postgresql/data  # 将 PostgreSQL 数据持久化到本地目录
+      - ./logs/postgres:/var/log/postgresql  # 新增：将 PostgreSQL 日志持久化到本地目录
+    ports:  # 端口映射
+      - "${POSTGRESQL_EXPOSE_PORT}:${POSTGRESQL_PORT}"  # 将容器的 5432 端口映射到主机的 5432 端口
+    networks:  # 网络配置
+      - go_zero_pgsql
+  #   只是usercenter的api服务
+  api:  # API 服务配置 代码变更
+    build:  # 构建配置
+      #      构建时的上下文目录,没生成Dockerfile的时候就是go.mod文件目录,goctl生成的dockerfile在以go.mod的目录生成构建命令需要
+      context: .
+      # 指向user_center的Dockerfile,这个路径根据上面context: ./app/user_center找到 dockerfile
+      dockerfile: ./Dockerfile-dev
+    container_name: ${APP_NAME}_api  # 设置容器名称,使用环境变量 APP_NAME
+    environment:  # 设置环境变量
+      - TZ=Asia/Shanghai  # 设置时区为上海
+      - GOPROXY=https://goproxy.cn,direct  # 设置 Go 代理
+      - DEBUG_SERVICE_PATH=/go/go_zero_dashboard_base/data/server  # 设置调试服务路径
+      - DB_HOST=postgres  # 设置数据库主机为 postgres 服务
+      - DB_PORT=${POSTGRESQL_PORT}  # 设置数据库端口
+      - DB_USER=${DB_USER}  # 设置数据库用户名
+      - DB_PASSWORD=${DB_PASSWORD}  # 设置数据库密码
+      - USER_DB_NAME=${USER_DB_NAME}  # 用户数据库的数据库名
+      - ORDER_DB_NAME=${ORDER_DB_NAME}  # 订单数据库的数据名\
+      # 这里指的是下面定义的服务名 redis,如果有多个服务,需要配置多个变量
+      - REDIS1_HOST=redis
+      # redis服务内部端口
+      - REDIS1_PORT=${REDIS1_PORT}
+      - REDIS1_PASSWORD=${REDIS1_PASSWORD} # 设置redis密码
+#    这个目录只在容器启动的时候生效,如果有,对dockerfile build时不影响,指的是容器内的目录,使用的是下面配置的挂载目录
+    working_dir: /go/go_zero_pgsql
+    volumes:
+      # 这里挂载当前目录(左侧的 . )到 容器内部目录(右侧的 /go/go_zero_pgsql )
+      - .:/go/go_zero_pgsql
+    privileged: true  # 给予容器特权模式
+    restart: always  # 容器退出时总是重启
+    networks:  # 网络配置
+      - go_zero_pgsql
+    ports:  # 端口映射 用于 dlv 配合goland 调试
+      - "2345:2345"  # 将容器的 2345 端口映射到主机的 2345 端口
+    depends_on:  # 依赖关系
+      - postgres  # 依赖于 postgres 服务
+    #   在运行时会覆盖Dockerfile中写的CMD代码
+    command: /bin/sh -c "pwd && echo 'Current directory contents:' && ls -la && echo 'Executing modd:' && modd"
+
+
+
+  gateway:  # Nginx 网关服务配置
+    image: nginx:1.21.5  # 使用 Nginx 1.21.5 版本的官方镜像
+    container_name: ${APP_NAME}_nginx-gateway  # 设置容器名称,使用环境变量 APP_NAME
+    restart: always  # 容器退出时总是重启
+    environment:  # 设置环境变量
+      - TZ=Asia/Shanghai  # 设置时区为上海
+    ports:  # 端口映射
+      - 8887:8887  # 将容器的 8887 端口映射到主机的 8887 端口
+    volumes:  # 配置数据卷
+      - ./deploy/nginx/conf.d:/etc/nginx/conf.d  # 挂载 Nginx 配置文件
+      - ./logs/nginx:/var/log/nginx  # 挂载 Nginx 日志目录
+    networks:  # 网络配置
+      - go_zero_pgsql
+    depends_on:  # 依赖关系
+      - api  # 依赖于 api 服务
+#  redis:
+#    # 底层也是redis 还按照redis使用方式即可
+#    image: pikadb/pika
+#    container_name: ${APP_NAME}_pikadb
+#    ports:
+#      # 6379注意配置文件中要一致
+#      - "${REDIS_EXPOSE_PORT}:6379"
+#    volumes:
+#      - ./data/pika:/pika/log
+#      # 指定配置文件路径,如果有需要指定配置文件则在这里指定 注意: pika.conf 要在./deploy/pika目录中
+#      # todo  密码在 如果要修改密码,注意修改 ./deploy/pika/pika.conf 文件里的秘密
+#      - ./deploy/pika:/pika/conf
+#      - ./data/pika/db:/pika/db
+#      - ./data/pika/dump:/pika/dump
+#      - ./data/pika/dbsync:/pika/dbsync
+#    environment:
+#      TZ: Asia/Shanghai
+#    privileged: true
+#    # 配置文件中已有 daemonize : yes 与这里冲突
+#    #    restart: always
+#    #    command: "cat /pika/conf/pika.conf"
+#    networks:
+#      - go_zero_pgsql
+  redis:
+    image: redis:6.2.5
+    container_name: ${APP_NAME}_redis
+    ports:
+      - "${REDIS1_EXPOSE_PORT}:${REDIS1_PORT}"
+    environment:
+      TZ: Asia/Shanghai
+    volumes:
+      - ./data/redis/data:/data:rw
+    # redis密码查看 app/usercenter/cmd/api/etc 配置文件
+    command: redis-server --requirepass ${REDIS1_PASSWORD} --appendonly yes
+    privileged: true
+    restart: always
+    networks:
+      - go_zero_pgsql

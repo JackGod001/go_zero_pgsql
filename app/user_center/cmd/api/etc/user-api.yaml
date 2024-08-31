@@ -1,21 +1,23 @@
 Name: user-api
 Host: 0.0.0.0
-Port: 1004
-Mode: pro
+Port: 8888
+Mode: dev
 #Mode: pro test pre dev
 
+
+#Cache:
+#  - Host: redis:6379
+#    Pass: G62m50oigInCsf
+#    Type: node
 Cache:
-  - Host: redis:6379
-    Pass: "G62m50oigInCsf"
+  - Host: ${REDIS1_HOST}:${REDIS1_PORT}
+    Pass: ${REDIS1_PASSWORD}
     Type: node
-
-
 Database:
-   # 容器的服务名
-    PGDataSource: "host=postgres port=5432 dbname=test_db user=go_zero_pgsql_db_user password=go_zero_pgsql_db_pass sslmode=disable"
+  PGDataSource: "host=${DB_HOST} port=${DB_PORT} dbname=${USER_DB_NAME} user=${DB_USER} password=${DB_PASSWORD} sslmode=disable"
 
 # 如果需要，可以添加其他配置项
-# 例如：
+# 例如业务redis,可以和上面的 Cache：
 # Redis:
 #   Host: redis:6379
 #   Type: node

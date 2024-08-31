@@ -19,7 +19,7 @@ fi
 
 # 假设 $CONFIG_PATH 和 $EXECUTABLE_PATH 已经被设置
 
-DLV_CMD="dlv --headless --listen=:$PORT --accept-multiclient --api-version=2 exec $EXECUTABLE_PATH"
+DLV_CMD="dlv --headless --listen=:2345 --accept-multiclient --api-version=2 exec $EXECUTABLE_PATH"
 
 # 检查 $CONFIG_PATH 是否为空
 if [ -z "$CONFIG_PATH" ]; then

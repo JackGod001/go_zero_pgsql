@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 
 # 使用方法：
-# ./gen_mode.sh
-# 生成的文件将在 ./gen_mode 目录下
+# ./gen_model.sh
+# 生成的文件将在 ./gen_model 目录下
 
 # 设置默认值
 tables="*"
@@ -24,32 +24,56 @@ else
 fi
 
 # 检查必要的环境变量
-if [ -z "$APP_NAME" ] || [ -z "$DB_USER" ] || [ -z "$DB_PASSWORD" ] || [ -z "$DB_NAME" ]; then
-    echo "错误：.env 文件中缺少必要的数据库配置。"
+required_vars=("APP_NAME" "DB_USER" "DB_PASSWORD"  "POSTGRESQL_EXPOSE_PORT")
+for var in "${required_vars[@]}"; do
+    if [ -z "${!var}" ]; then
+        echo "错误：.env 文件中缺少必要的配置：$var"
+        exit 1
+    fi
+done
+
+# 要生成哪个数据库的代码
+dbname=$USER_DB_NAME
+
+# 数据库用户名
+username=$DB_USER
+# 数据库密码
+passwd=$DB_PASSWORD
+# 这里是docker-compose.yml中设置的服务名
+host=${POSTGRES_SERVICE}
+#.env文件中配置的容器对外端口
+port=${POSTGRESQL_EXPOSE_PORT}
+
+
+pwd
+# 确保 gen_model 目录存在
+mkdir -p "$modeldir"
+
+# 获取 goctl 模板路径
+currentPath=$(pwd)
+goctlPath=$(realpath ../../goctl/1.7.1)
+if [ ! -d "$goctlPath" ]; then
+    echo "错误：找不到 goctl 目录：$goctlPath"
     exit 1
 fi
 
-# 设置数据库连接参数
-dbname=$DB_NAME
-username=$DB_USER
-passwd=$DB_PASSWORD
-port=5432
+# 设置 goctl 模板路径
+export GOCTL_HOME="$goctlPath"
+echo "goctl 模板目录: $GOCTL_HOME"
 
-# 确保 gen_mode 目录存在
-mkdir -p "$modeldir"
-
-
-currentPath=$(pwd)
-cd ../../goctl/1.7.0
-# 设置goctl模板路径
-GOCTL_TEMPLATE_DIR=$(pwd)
-echo "goctl 模板目录: "$GOCTL_TEMPLATE_DIR
-
-cd  $currentPath
+cd "$currentPath" || exit
 echo "开始为数据库 $dbname 生成所有表的模型"
 
-#echo "开始创建库：$dbname 的表：$2"
-$GOCTL_TEMPLATE_DIR/goctl model pg datasource -url="postgres://${username}:${passwd}@localhost:${port}/${dbname}?sslmode=disable" -table="${tables}" -dir="${modeldir}" -cache=true --style=goZero
+# 协议://用户名:密码@主机名:端口/数据库名?sslmode=disable
+CON="postgres://${username}:${passwd}@localhost:${port}/${dbname}?sslmode=disable"
+echo "数据库连接信息：$CON"
+# 执行 goctl 命令
+$GOCTL_HOME/ model pg datasource -url=${CON} -table="${tables}" -dir="${modeldir}" -cache=true --style=goZero
+
+if [ $? -ne 0 ]; then
+    echo "错误：goctl 命令执行失败"
+    exit 1
+fi
+
 echo "模型生成完成。生成的文件位于 $modeldir 目录。"
 echo "请将生成的文件移动到相应服务的 model 目录，并记得修改 package 声明。"
-

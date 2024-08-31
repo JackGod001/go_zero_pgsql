@@ -26,9 +26,11 @@ func NewGetUserLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetUserLo
 func (l *GetUserLogic) GetUser(req *types.GetUserRequest) (resp *types.GetUserResponse, err error) {
 	userModel, err := l.svcCtx.UsersModel.FindOne(l.ctx, req.Id)
 	if err != nil {
+		logx.WithContext(l.ctx).Errorf("UsersModel.FindOne", err.Error())
 		return nil, err
 	}
 	return &types.GetUserResponse{
-		Username: userModel.Username,
+		Username:  userModel.Username,
+		CreatedAt: userModel.CreatedAt.Format("2006-01-02 15:04:05"),
 	}, nil
 }
