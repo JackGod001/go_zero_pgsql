@@ -4,6 +4,11 @@ Port: 8888
 Mode: dev
 #Mode: pro test pre dev
 
+#监控
+Prometheus:
+  Host: 0.0.0.0
+  Port: 4001
+  Path: /metrics
 
 #Cache:
 #  - Host: redis:6379

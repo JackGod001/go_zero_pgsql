@@ -24,8 +24,12 @@ go mod tidy
 
 并发测试
 ```shell
-wrk -t12 -c4000 -d3s -s test.lua http://localhost:8887
-
+wrk -t50 -c50000 -d3s -s wrk.lua http://localhost:8887
+```
+```shell
+# todo
+# 我们用 hey 工具来进行压测，压测 90 个并发，执行 1 秒
+hey -z 1s -c 90 -q 1 'http://localhost:8888/ping'
 ```
 
 
