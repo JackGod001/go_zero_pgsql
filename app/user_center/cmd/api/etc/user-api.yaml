@@ -3,6 +3,8 @@ Host: 0.0.0.0
 Port: 8888
 Mode: dev
 #Mode: pro test pre dev
+#并发请求限制,低于100没用
+#MaxConns: 100
 
 #监控
 Prometheus:
@@ -20,6 +22,16 @@ Cache:
     Type: node
 Database:
   PGDataSource: "host=${DB_HOST} port=${DB_PORT} dbname=${USER_DB_NAME} user=${DB_USER} password=${DB_PASSWORD} sslmode=disable"
+
+
+
+#链路追踪
+Telemetry:
+  # 只需要配置服务名字即可,其他不动
+  Name: user_center_api
+  Endpoint: http://jaeger:14268/api/traces
+  Sampler: 1.0
+  Batcher: jaeger
 
 # 如果需要，可以添加其他配置项
 # 例如业务redis,可以和上面的 Cache：
