@@ -23,7 +23,10 @@ Cache:
 Database:
   PGDataSource: "host=${DB_HOST} port=${DB_PORT} dbname=${USER_DB_NAME} user=${DB_USER} password=${DB_PASSWORD} sslmode=disable"
 
-
+Redis:
+  Host: ${REDIS1_HOST}:${REDIS1_PORT}
+  Type: node
+  Pass: ${REDIS1_PASSWORD}
 
 #链路追踪
 Telemetry:

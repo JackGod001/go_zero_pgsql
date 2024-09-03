@@ -204,6 +204,7 @@ Telemetry:
 - elasticsearch 作用: 全文搜索引擎，提供日志查询，作为链路追踪的存储，prometheus 的存储
 
 ## 待办事项
+不使用 redis/postgres? 在启动服务不会立刻报错.只有发生请求后才会报错?? user.go 中
 
 - Postgres 集群监控 Pigsty
   [哔哩哔哩视频链接](https://www.bilibili.com/video/BV13q4y1o74M/?spm_id_from=333.880.my_history.page.click&vd_source=ca29f7158bd0ff443c7d38352c028de4)

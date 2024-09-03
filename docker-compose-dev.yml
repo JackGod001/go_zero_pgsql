@@ -110,10 +110,22 @@ services:  # 定义服务
     restart: always
     networks:
       - go_zero_pgsql
+#  用来检测redis
+  redis-exporter:
+    image: oliver006/redis_exporter:latest
+    environment:
+      - REDIS_ADDR=redis://redis:6379  # 假设您的 Redis 服务名为 'redis'
+      - REDIS_PASSWORD=${REDIS1_PASSWORD}
+#    ports:
+#      - "9121:9121"
+    depends_on:
+      - redis
+    networks:
+      - go_zero_pgsql
   #prometheus监控 — Prometheus for monitoring
   # http://127.0.0.1:9090
   prometheus:
-    image: prom/prometheus:v2.28.1
+    image: prom/prometheus
     container_name: ${APP_NAME}_dev_prometheus
     environment:
       # 时区上海 - Time zone Shanghai (Change if needed)
@@ -138,13 +150,14 @@ services:  # 定义服务
   #查看prometheus监控数据 - Grafana to view Prometheus monitoring data
 #Grafana: http://127.0.0.1:3001/  ， 默认账号、密码都是 admin
   grafana:
-    image: grafana/grafana:8.0.6
+    image: grafana/grafana
     container_name: ${APP_NAME}_dev_grafana
     hostname: grafana
     user: root
     environment:
+      - GF_USERS_DEFAULT_LANGUAGE=zh-CN
       # 时区上海 - Time zone Shanghai (Change if needed)
-      TZ: Asia/Shanghai
+      - TZ=Asia/Shanghai
     restart: always
     volumes:
       - ./data/grafana/data:/var/lib/grafana

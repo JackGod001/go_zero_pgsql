@@ -1,11 +1,11 @@
 global:
-  scrape_interval: 15s  # 设置全局抓取间隔为15秒
+  scrape_interval: 15s
   external_labels:
     monitor: 'codelab-monitor'
 
 scrape_configs:
   - job_name: 'prometheus'
-    scrape_interval: 5s  # 保持原有的Prometheus自身监控配置
+    scrape_interval: 5s
     static_configs:
       - targets: ['127.0.0.1:9090']
 
@@ -15,4 +15,13 @@ scrape_configs:
         labels:
           job: user_center-api
           app: user_center-api
+          env: dev
+
+  # 新增的 Redis 监控配置
+  - job_name: 'redis'
+    static_configs:
+      - targets: ['redis-exporter:9121']  # Redis Exporter 的地址和端口
+        labels:
+          job: redis
+          app: redis
           env: dev
