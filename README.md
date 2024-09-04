@@ -5,6 +5,7 @@ cp template.env .env
 docker compose up
 sh deploy/script/shell/db.sh
 docker compose restart
+curl "http://localhost:8887/v1/user-center/user?id=1"
 ```
 ## 1. 技术架构
 
