@@ -2,9 +2,9 @@
 ## 快速启动
 ```yaml
 cp template.env .env
-docker compose up
+docker compose -f docker-compose.yml -f docker-compose-env.yml up
 sh deploy/script/shell/db.sh
-docker compose restart
+#发送请求测试
 curl "http://localhost:8887/v1/user-center/user?id=1"
 ```
 ## 1. 技术架构
@@ -142,9 +142,9 @@ go.work 解决了go.mod 文件中多个 module 的问题,每个服务下的go.mo
 
 ```shell
 # 启动执行  指定 docker-compose-dev.yml
-docker compose -f docker-compose-dev.yml up
+docker compose -f docker-compose-env.yml -f docker-compose-dev.yml  up
 # 停止 
-docker compose -f docker-compose-dev.yml down
+docker compose -f docker-compose-dev.yml -f docker-compose-env.yml down
 # 重新build 不使用缓存
 docker compose -f docker-compose-dev.yml build --no-cache
 ```
@@ -153,15 +153,16 @@ docker compose -f docker-compose-dev.yml build --no-cache
 注意服务下的配置文件中 mode 要修改为 pro
 ![img.png](img.png)
 ```shell
+
 #删除
-docker compose down
+docker compose -f docker-compose.yml -f docker-compose-env.yml down
 docker compose rm -s api
 ## 重新build 不使用缓存
 docker compose build --no-cache
 docker compose build api --no-cache
 # 启动
-docker compose up -d   
-docker compose stop   
+docker compose  -f docker-compose.yml -f docker-compose-env.yml up -d   
+docker compose  -f docker-compose.yml -f docker-compose-env.yml stop   
 ```
 
 ## 9. 链路追踪

@@ -2,21 +2,7 @@ networks:
   go_zero_pgsql:
     driver: bridge
 services:  # 定义服务
-  postgres:  # PostgreSQL 服务配置
-    image: postgres:13  # 使用 PostgreSQL 13 版本的官方镜像
-    container_name: ${APP_NAME}_postgres_dev  # 设置容器名称,使用环境变量 APP_NAME
-    restart: always  # 容器退出时总是重启
-    environment:  # 设置环境变量
-      - POSTGRES_USER=${DB_USER}  # 设置 PostgreSQL 用户名
-      - POSTGRES_PASSWORD=${DB_PASSWORD}  # 设置 PostgreSQL 密码
-      - TZ=Asia/Shanghai  # 设置时区为上海
-    volumes:  # 配置数据卷
-      - ./data/postgres:/var/lib/postgresql/data  # 将 PostgreSQL 数据持久化到本地目录
-      - ./logs/postgres:/var/log/postgresql  # 新增：将 PostgreSQL 日志持久化到本地目录
-    ports:  # 端口映射
-      - "${POSTGRESQL_EXPOSE_PORT}:${POSTGRESQL_PORT}"  # 将容器的 5432 端口映射到主机的 5432 端口
-    networks:  # 网络配置
-      - go_zero_pgsql
+
   #   只是usercenter的api服务
   api:  # API 服务配置 代码变更
     build:  # 构建配置
@@ -40,6 +26,8 @@ services:  # 定义服务
       # redis服务内部端口
       - REDIS1_PORT=${REDIS1_PORT}
       - REDIS1_PASSWORD=${REDIS1_PASSWORD} # 设置redis密码
+      - GO_ZEOR_MODE=dev  # go-zero环境 mode
+      - GO_ZEOR_LOG_LEVEL=debug  # go-zero 日志级别
 #    这个目录只在容器启动的时候生效,如果有,对dockerfile build时不影响,指的是容器内的目录,使用的是下面配置的挂载目录
     working_dir: /go/go_zero_pgsql
     volumes:
@@ -70,139 +58,16 @@ services:  # 定义服务
       - ./logs/nginx:/var/log/nginx  # 挂载 Nginx 日志目录
     networks:  # 网络配置
       - go_zero_pgsql
-    depends_on:  # 依赖关系
-      - api  # 依赖于 api 服务
-#  redis:
-#    # 底层也是redis 还按照redis使用方式即可
-#    image: pikadb/pika
-#    container_name: ${APP_NAME}_dev_pikadb
-#    ports:
-#      # 6379注意配置文件中要一致
-#      - "${REDIS_EXPOSE_PORT}:6379"
-#    volumes:
-#      - ./data/pika:/pika/log
-#      # 指定配置文件路径,如果有需要指定配置文件则在这里指定 注意: pika.conf 要在./deploy/pika目录中
-#      # todo  密码在 如果要修改密码,注意修改 ./deploy/pika/pika.conf 文件里的秘密
-#      - ./deploy/pika:/pika/conf
-#      - ./data/pika/db:/pika/db
-#      - ./data/pika/dump:/pika/dump
-#      - ./data/pika/dbsync:/pika/dbsync
-#    environment:
-#      TZ: Asia/Shanghai
-#    privileged: true
-#    # 配置文件中已有 daemonize : yes 与这里冲突
-#    #    restart: always
-#    #    command: "cat /pika/conf/pika.conf"
-#    networks:
-#      - go_zero_pgsql
+    depends_on:
+#      必须依赖于api服务,否则会报错502
+      - api
+
   redis:
-    image: redis:6.2.5
-    container_name: ${APP_NAME}_dev_redis
-    ports:
-      - "${REDIS1_EXPOSE_PORT}:${REDIS1_PORT}"
-    environment:
-      TZ: Asia/Shanghai
-    volumes:
-      - ./data/redis/data:/data:rw
-    # redis密码查看 app/usercenter/cmd/api/etc 配置文件
-    command: redis-server --requirepass ${REDIS1_PASSWORD} --appendonly yes
-    privileged: true
-    restart: always
-    networks:
-      - go_zero_pgsql
-#  用来检测redis
-  redis-exporter:
-    image: oliver006/redis_exporter:latest
-    environment:
-      - REDIS_ADDR=redis://redis:6379  # 假设您的 Redis 服务名为 'redis'
-      - REDIS_PASSWORD=${REDIS1_PASSWORD}
-#    ports:
-#      - "9121:9121"
-    depends_on:
-      - redis
-    networks:
-      - go_zero_pgsql
-  #prometheus监控 — Prometheus for monitoring
-  # http://127.0.0.1:9090
-  prometheus:
-    image: prom/prometheus
-    container_name: ${APP_NAME}_dev_prometheus
-    environment:
-      # 时区上海 - Time zone Shanghai (Change if needed)
-      TZ: Asia/Shanghai
-    volumes:
-      #      - /deploy/prometheus/server/prometheus.yml 配置文件不支持使用环境变量
-      #  使用 ConfigMap（Kubernetes）
-      #  如果您在 Kubernetes 中运行 Prometheus，可以使用 ConfigMap 来管理配置文件，并在其中使用环境变量。
-      - ./deploy/prometheus/server/prometheus.yml:/etc/prometheus/prometheus.yml
-      - ./data/prometheus/data:/prometheus
-    command:
-      - '--config.file=/etc/prometheus/prometheus.yml'
-      - '--storage.tsdb.path=/prometheus'
-    restart: always
-    user: root
-    ports:
-      - 9090:9090
-    networks:
-      - go_zero_pgsql
-    depends_on:  # 依赖关系
-      - api  # 依赖于 api 服务
-  #查看prometheus监控数据 - Grafana to view Prometheus monitoring data
-#Grafana: http://127.0.0.1:3001/  ， 默认账号、密码都是 admin
-  grafana:
-    image: grafana/grafana
-    container_name: ${APP_NAME}_dev_grafana
-    hostname: grafana
-    user: root
-    environment:
-      - GF_USERS_DEFAULT_LANGUAGE=zh-CN
-      # 时区上海 - Time zone Shanghai (Change if needed)
-      - TZ=Asia/Shanghai
-    restart: always
-    volumes:
-      - ./data/grafana/data:/var/lib/grafana
-    ports:
-      - "3001:3000"
-    networks:
-      - go_zero_pgsql
-    depends_on: # 依赖关系
-      - api  # 依赖于 api 服务
-      - prometheus
-  #jaeger链路追踪 — Jaeger for tracing 依赖 elasticsearch(做存储)
-  jaeger:
-    image: jaegertracing/all-in-one
-    container_name: ${APP_NAME}_jaeger
-    restart: always
-    ports:
-      - "5775:5775/udp"
-      - "6831:6831/udp"
-      - "6832:6832/udp"
-      - "5778:5778"
-      - "16686:16686"
-      - "14268:14268"
-      - "9411:9411"
-    environment:
-      - SPAN_STORAGE_TYPE=elasticsearch
-      - ES_SERVER_URLS=http://elasticsearch:9200
-      - LOG_LEVEL=debug
-    networks:
-      - go_zero_pgsql
-    depends_on:
-      - elasticsearch
-  #搜集kafka业务日志、存储 prometheus 监控数据 - Kafka for collecting business logs and storing Prometheus monitoring data
-  elasticsearch:
-    image: docker.elastic.co/elasticsearch/elasticsearch:7.13.4
-    container_name: ${APP_NAME}_elasticsearch
-    user: root
-    environment:
-      - discovery.type=single-node
-      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
-      - TZ=Asia/Shanghai
-    volumes:
-      - ./data/elasticsearch/data:/usr/share/elasticsearch/data
-    restart: always
-    ports:
-      - 9200:9200
-      - 9300:9300
-    networks:
-      - go_zero_pgsql
+    extends:
+      file: docker-compose-env.yml
+      service: redis
+  postgres:
+    extends:
+      file: docker-compose-env.yml
+      service: postgres
+

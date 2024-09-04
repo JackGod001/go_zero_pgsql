@@ -1,13 +1,13 @@
 Name: user-api
 Host: 0.0.0.0
 Port: 8888
-Mode: pro
+Mode: ${GO_ZEOR_MODE}
 #Mode: pro test pre dev
 #并发请求限制,低于100没用
-MaxConns: 20000
+#MaxConns: 20000
 Log:
   ServiceName: user_center_api
-  Level: error
+  Level: ${GO_ZEOR_LOG_LEVEL}
 
 #监控
 Prometheus:
