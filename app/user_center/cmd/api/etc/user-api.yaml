@@ -1,10 +1,13 @@
 Name: user-api
 Host: 0.0.0.0
 Port: 8888
-Mode: dev
+Mode: pro
 #Mode: pro test pre dev
 #并发请求限制,低于100没用
-#MaxConns: 100
+MaxConns: 20000
+Log:
+  ServiceName: user_center_api
+  Level: error
 
 #监控
 Prometheus:
