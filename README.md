@@ -1,5 +1,11 @@
 # 技术架构和配置说明
-
+## 快速启动
+```yaml
+cp template.env .env
+docker compose up
+sh deploy/script/shell/db.sh
+docker compose restart
+```
 ## 1. 技术架构
 
 1. Postgres 集群监控: Pigsty
@@ -208,3 +214,4 @@ Telemetry:
 
 - Postgres 集群监控 Pigsty
   [哔哩哔哩视频链接](https://www.bilibili.com/video/BV13q4y1o74M/?spm_id_from=333.880.my_history.page.click&vd_source=ca29f7158bd0ff443c7d38352c028de4)
+
