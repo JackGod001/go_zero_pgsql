@@ -105,7 +105,7 @@ services:  # 定义服务
     environment:
       - SPAN_STORAGE_TYPE=elasticsearch
       - ES_SERVER_URLS=http://elasticsearch:9200
-      - LOG_LEVEL=debug
+      - LOG_LEVEL=${JAEGER_LOG_LEVEL}
     networks:
       - go_zero_pgsql
     depends_on:
