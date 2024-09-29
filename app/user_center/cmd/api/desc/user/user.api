@@ -1,0 +1,117 @@
+type (
+    //	令牌相关
+    JwtAuth {
+        AccessSecret string `json:"accessSecret"`
+        AccessExpire int64 `json:"accessExpire"`
+        RefreshToken string `json:"refresh_token,omitempty"`
+        ExpiresAt int64 `json:"expires_at,omitempty"`
+    }
+
+
+        // 用户登录
+    LoginRequest {
+        Email string `json:"email"     validate:"email"         label:"邮箱"`
+        Password string `json:"password"  validate:"min=6,max=12"  label:"密码"`
+    }
+    LoginResponse {
+        JwtAuth
+    }
+        // 用户注册
+    RegisterRequest {
+        Email string `json:"email"     validate:"email"         label:"邮箱"`
+        Password string `json:"password"  validate:"min=6,max=12"  label:"密码"`
+    }
+    RegisterResponse {
+        Id int64 `json:"id"`
+        Email string `json:"email"`
+    }
+
+        //忘记密码获取邮箱验证码
+    GetForgetPasswordCdoeRequest {
+        Email string `json:"email"     validate:"email"         label:"邮箱"`
+    }
+
+        // 重置密码
+    ResetPasswordRequest {
+        Email string `json:"email"     validate:"email"         label:"邮箱"`
+        Password string `json:"password"  validate:"min=6,max=12"  label:"密码"`
+        Code string `json:"code"      validate:"min=6,max=6"   label:"验证码"`
+    }
+        //	 修改密码
+    UpdatePasswordRequest {
+        Email string `json:"email"     validate:"email"         label:"邮箱"`
+        OldPassword string `json:"oldPassword"  validate:"min=6,max=12"  label:"旧密码"`
+        NewPassword string `json:"newPassword"  validate:"min=6,max=12"  label:"新密码"`
+    }
+
+        // 重置密码响应
+    ResetPasswordResponse {
+        Success bool `json:"success"`
+    }
+
+        //刷新token
+    RefreshTokenRequest {
+        RefreshToken string `json:"refreshToken"`
+    }
+        //	刷新token
+    RefreshTokenResponse {
+        JwtAuth
+    }
+)
+@server(
+    prefix: uapi/v1
+    timeout: 3000s
+)
+service user-api {
+    @doc(
+        summary: "登录"
+    )
+    @handler Login
+    post /user/login (LoginRequest) returns (LoginResponse)
+
+    @doc(
+        summary: "注册"
+    )
+    @handler Register
+    post /user/register (RegisterRequest) returns (RegisterResponse)
+
+    @doc(
+        summary: "忘记密码获取验证码"
+    )
+    @handler GetForgetPasswordCdoeRequest
+    post /user/forget/code (GetForgetPasswordCdoeRequest)
+
+    @doc(
+        summary: "重置密码"
+    )
+    @handler ResetPassword
+    post /user/reset/password (ResetPasswordRequest) returns (ResetPasswordResponse)
+}
+
+type (
+    // 用户信息
+    UserInfoResponse {
+        Id int64 `json:"id"`
+        Email string `json:"email"`
+    }
+)
+
+
+@server(
+    prefix: uapi/v1
+    timeout: 3000s
+    jwt: JwtAuth
+)
+service user-api {
+    @doc(
+        summary: "获取用户信息"
+    )
+    @handler UserInfo
+    post /user/userinfo  returns (UserInfoResponse)
+
+    @doc(
+        summary: "修改密码"
+    )
+    @handler UpdatePassword
+    post /user/update/password (UpdatePasswordRequest) returns (ResetPasswordResponse)
+}

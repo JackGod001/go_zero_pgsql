@@ -1,0 +1,15 @@
+syntax = "v1"
+
+info (
+	title:   "用户中心api服务"
+	desc:    ""
+	author:  ""
+	email:   ""
+	version: "v1.0.0"
+)
+
+import (
+	// 用户api
+	"user/user.api"
+)
+

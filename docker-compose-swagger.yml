@@ -1,0 +1,13 @@
+services:
+  swagger-ui:
+    image: swaggerapi/swagger-ui
+    ports:
+      - "8083:8080"
+    volumes:
+    #  搜索框中输入 swagger/user_center.json 后面的json文件就是在 swaggerapi 目录下的
+      - ./deploy/swaggerapi:/usr/share/nginx/html/swagger
+    environment:
+      #    这个url swaggerapi 是在  http://localhost:8083/swaggerapi 后面的部分，
+      #      用于在同一个域名下访问 swagger，也可以不写，那么就是
+      BASE_URL: /swaggerapi
+      EMBEDDING: true

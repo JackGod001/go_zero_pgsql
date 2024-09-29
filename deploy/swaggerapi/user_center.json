@@ -1,0 +1,412 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "用户中心api服务",
+    "version": "v1.0.0"
+  },
+  "schemes": [
+    "http",
+    "https"
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/uapi/v1/user/forget/code": {
+      "post": {
+        "summary": "忘记密码获取验证码",
+        "operationId": "GetForgetPasswordCdoeRequest",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {}
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "description": "忘记密码获取邮箱验证码",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/GetForgetPasswordCdoeRequest"
+            }
+          }
+        ],
+        "tags": [
+          "user-api"
+        ]
+      }
+    },
+    "/uapi/v1/user/login": {
+      "post": {
+        "summary": "登录",
+        "operationId": "Login",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/LoginResponse"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "description": " 用户登录",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/LoginRequest"
+            }
+          }
+        ],
+        "tags": [
+          "user-api"
+        ]
+      }
+    },
+    "/uapi/v1/user/register": {
+      "post": {
+        "summary": "注册",
+        "operationId": "Register",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/RegisterResponse"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "description": " 用户注册",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/RegisterRequest"
+            }
+          }
+        ],
+        "tags": [
+          "user-api"
+        ]
+      }
+    },
+    "/uapi/v1/user/reset/password": {
+      "post": {
+        "summary": "重置密码",
+        "operationId": "ResetPassword",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/ResetPasswordResponse"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "description": " 重置密码",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/ResetPasswordRequest"
+            }
+          }
+        ],
+        "tags": [
+          "user-api"
+        ]
+      }
+    },
+    "/uapi/v1/user/update/password": {
+      "post": {
+        "summary": "修改密码",
+        "operationId": "UpdatePassword",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/ResetPasswordResponse"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "description": "\t 修改密码",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/UpdatePasswordRequest"
+            }
+          }
+        ],
+        "tags": [
+          "user-api"
+        ],
+        "security": [
+          {
+            "apiKey": []
+          }
+        ]
+      }
+    },
+    "/uapi/v1/user/userinfo": {
+      "post": {
+        "summary": "获取用户信息",
+        "operationId": "UserInfo",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/UserInfoResponse"
+            }
+          }
+        },
+        "tags": [
+          "user-api"
+        ],
+        "security": [
+          {
+            "apiKey": []
+          }
+        ]
+      }
+    }
+  },
+  "definitions": {
+    "GetForgetPasswordCdoeRequest": {
+      "type": "object",
+      "properties": {
+        "email": {
+          "type": "string"
+        }
+      },
+      "title": "GetForgetPasswordCdoeRequest",
+      "required": [
+        "email",
+        "邮箱"
+      ]
+    },
+    "JwtAuth": {
+      "type": "object",
+      "properties": {
+        "accessSecret": {
+          "type": "string"
+        },
+        "accessExpire": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "refresh_token": {
+          "type": "string"
+        },
+        "expires_at": {
+          "type": "integer",
+          "format": "int64"
+        }
+      },
+      "title": "JwtAuth",
+      "required": [
+        "accessSecret",
+        "accessExpire"
+      ]
+    },
+    "LoginRequest": {
+      "type": "object",
+      "properties": {
+        "email": {
+          "type": "string"
+        },
+        "password": {
+          "type": "string"
+        }
+      },
+      "title": "LoginRequest",
+      "required": [
+        "email",
+        "邮箱",
+        "password",
+        "密码"
+      ]
+    },
+    "LoginResponse": {
+      "type": "object",
+      "properties": {
+        "accessSecret": {
+          "type": "string"
+        },
+        "accessExpire": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "refresh_token": {
+          "type": "string"
+        },
+        "expires_at": {
+          "type": "integer",
+          "format": "int64"
+        }
+      },
+      "title": "LoginResponse"
+    },
+    "RefreshTokenRequest": {
+      "type": "object",
+      "properties": {
+        "refreshToken": {
+          "type": "string"
+        }
+      },
+      "title": "RefreshTokenRequest",
+      "required": [
+        "refreshToken"
+      ]
+    },
+    "RefreshTokenResponse": {
+      "type": "object",
+      "properties": {
+        "accessSecret": {
+          "type": "string"
+        },
+        "accessExpire": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "refresh_token": {
+          "type": "string"
+        },
+        "expires_at": {
+          "type": "integer",
+          "format": "int64"
+        }
+      },
+      "title": "RefreshTokenResponse"
+    },
+    "RegisterRequest": {
+      "type": "object",
+      "properties": {
+        "email": {
+          "type": "string"
+        },
+        "password": {
+          "type": "string"
+        }
+      },
+      "title": "RegisterRequest",
+      "required": [
+        "email",
+        "邮箱",
+        "password",
+        "密码"
+      ]
+    },
+    "RegisterResponse": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "email": {
+          "type": "string"
+        }
+      },
+      "title": "RegisterResponse",
+      "required": [
+        "id",
+        "email"
+      ]
+    },
+    "ResetPasswordRequest": {
+      "type": "object",
+      "properties": {
+        "email": {
+          "type": "string"
+        },
+        "password": {
+          "type": "string"
+        },
+        "code": {
+          "type": "string"
+        }
+      },
+      "title": "ResetPasswordRequest",
+      "required": [
+        "email",
+        "邮箱",
+        "password",
+        "密码",
+        "code",
+        "验证码"
+      ]
+    },
+    "ResetPasswordResponse": {
+      "type": "object",
+      "properties": {
+        "success": {
+          "type": "boolean",
+          "format": "boolean"
+        }
+      },
+      "title": "ResetPasswordResponse",
+      "required": [
+        "success"
+      ]
+    },
+    "UpdatePasswordRequest": {
+      "type": "object",
+      "properties": {
+        "email": {
+          "type": "string"
+        },
+        "oldPassword": {
+          "type": "string"
+        },
+        "newPassword": {
+          "type": "string"
+        }
+      },
+      "title": "UpdatePasswordRequest",
+      "required": [
+        "email",
+        "邮箱",
+        "oldPassword",
+        "旧密码",
+        "newPassword",
+        "新密码"
+      ]
+    },
+    "UserInfoResponse": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "email": {
+          "type": "string"
+        }
+      },
+      "title": "UserInfoResponse",
+      "required": [
+        "id",
+        "email"
+      ]
+    }
+  },
+  "securityDefinitions": {
+    "apiKey": {
+      "type": "apiKey",
+      "description": "Enter JWT Bearer token **_only_**",
+      "name": "Authorization",
+      "in": "header"
+    }
+  }
+}
