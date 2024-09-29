@@ -3,11 +3,61 @@
 
 package types
 
-type GetUserRequest struct {
-	Id int64 `form:"id"`
+type GetForgetPasswordCdoeRequest struct {
+	Email string `json:"email"     validate:"email"         label:"邮箱"`
 }
 
-type GetUserResponse struct {
-	Username  string `json:"username"`
-	CreatedAt string `json:"createdAt"`
+type JwtAuth struct {
+	AccessSecret string `json:"accessSecret"`
+	AccessExpire int64  `json:"accessExpire"`
+	RefreshToken string `json:"refresh_token,omitempty"`
+	ExpiresAt    int64  `json:"expires_at,omitempty"`
+}
+
+type LoginRequest struct {
+	Email    string `json:"email"     validate:"email"         label:"邮箱"`
+	Password string `json:"password"  validate:"min=6,max=12"  label:"密码"`
+}
+
+type LoginResponse struct {
+	JwtAuth
+}
+
+type RefreshTokenRequest struct {
+	RefreshToken string `json:"refreshToken"`
+}
+
+type RefreshTokenResponse struct {
+	JwtAuth
+}
+
+type RegisterRequest struct {
+	Email    string `json:"email"     validate:"email"         label:"邮箱"`
+	Password string `json:"password"  validate:"min=6,max=12"  label:"密码"`
+}
+
+type RegisterResponse struct {
+	Id    int64  `json:"id"`
+	Email string `json:"email"`
+}
+
+type ResetPasswordRequest struct {
+	Email    string `json:"email"     validate:"email"         label:"邮箱"`
+	Password string `json:"password"  validate:"min=6,max=12"  label:"密码"`
+	Code     string `json:"code"      validate:"min=6,max=6"   label:"验证码"`
+}
+
+type ResetPasswordResponse struct {
+	Success bool `json:"success"`
+}
+
+type UpdatePasswordRequest struct {
+	Email       string `json:"email"     validate:"email"         label:"邮箱"`
+	OldPassword string `json:"oldPassword"  validate:"min=6,max=12"  label:"旧密码"`
+	NewPassword string `json:"newPassword"  validate:"min=6,max=12"  label:"新密码"`
+}
+
+type UserInfoResponse struct {
+	Id    int64  `json:"id"`
+	Email string `json:"email"`
 }

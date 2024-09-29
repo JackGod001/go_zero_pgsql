@@ -2,7 +2,7 @@ networks:
   go_zero_pgsql:
     external: true
 services:  # 定义服务
-  api:  # API 服务配置 代码变更
+  uapi:  # API 服务配置 代码变更
     build:  # 构建配置
 #      构建时的上下文目录,没生成Dockerfile的时候就是go.mod文件目录,goctl生成的dockerfile在以go.mod的目录生成构建命令需要
       context: ./app/user_center
