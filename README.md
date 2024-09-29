@@ -217,3 +217,12 @@ Telemetry:
 - Postgres 集群监控 Pigsty
   [哔哩哔哩视频链接](https://www.bilibili.com/video/BV13q4y1o74M/?spm_id_from=333.880.my_history.page.click&vd_source=ca29f7158bd0ff443c7d38352c028de4)
 
+## 11. swagger 
+https://swagger.io/docs/open-source-tools/swagger-ui/usage/installation/
+[docker-compose-swagger.yml](docker-compose-swagger.yml)
+访问 http://127.0.0.1:8083/swaggerapi/
+访问特定的json  搜索框中输入 swagger/user_center.json 后面的json文件就是在 deploy/swaggerapi 目录下的
+
+
+## todo
+定义的 error 常量对应的文字怎么根据不同地区用户显示不同的语言文字?
