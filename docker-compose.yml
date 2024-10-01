@@ -64,4 +64,4 @@ services:  # 定义服务
       - go_zero_pgsql
     depends_on:
       #      必须依赖于api服务,否则会报错502
-      - api
+      - uapi

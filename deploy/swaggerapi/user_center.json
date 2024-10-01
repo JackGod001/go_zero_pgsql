@@ -41,6 +41,34 @@
         ]
       }
     },
+    "/uapi/v1/user/info": {
+      "post": {
+        "summary": "获取用户信息测试",
+        "operationId": "TestUserInfo",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/UserInfoResponse"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "description": " 用户登录",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/TestGetUserInfoRequest"
+            }
+          }
+        ],
+        "tags": [
+          "user-api"
+        ]
+      }
+    },
     "/uapi/v1/user/login": {
       "post": {
         "summary": "登录",
@@ -159,7 +187,7 @@
       }
     },
     "/uapi/v1/user/userinfo": {
-      "post": {
+      "get": {
         "summary": "获取用户信息",
         "operationId": "UserInfo",
         "responses": {
@@ -358,6 +386,26 @@
       "title": "ResetPasswordResponse",
       "required": [
         "success"
+      ]
+    },
+    "TestGetUserInfoRequest": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "Noid": {
+          "type": "integer",
+          "format": "int64"
+        }
+      },
+      "title": "TestGetUserInfoRequest",
+      "required": [
+        "id",
+        "用户id",
+        "Noid",
+        "非必要用户id"
       ]
     },
     "UpdatePasswordRequest": {

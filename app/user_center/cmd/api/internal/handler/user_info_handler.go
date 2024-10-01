@@ -1,11 +1,11 @@
 package handler
 
 import (
-	"net/http"
-
-	xhttp "github.com/zeromicro/x/http"
 	"go_zero_pgsql/app/user_center/cmd/api/internal/logic"
 	"go_zero_pgsql/app/user_center/cmd/api/internal/svc"
+	"net/http"
+
+	"github.com/zeromicro/go-zero/rest/httpx"
 )
 
 // 获取用户信息
@@ -14,11 +14,10 @@ func UserInfoHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 		l := logic.NewUserInfoLogic(r.Context(), svcCtx)
 		resp, err := l.UserInfo()
 		if err != nil {
-			// code-data 响应格式
-			xhttp.JsonBaseResponseCtx(r.Context(), w, err)
+			err = svcCtx.Trans.TransError(r.Context(), err)
+			httpx.ErrorCtx(r.Context(), w, err)
 		} else {
-			// code-data 响应格式
-			xhttp.JsonBaseResponseCtx(r.Context(), w, resp)
+			httpx.OkJsonCtx(r.Context(), w, resp)
 		}
 	}
 }

@@ -106,8 +106,17 @@ services:  # 定义服务
       - SPAN_STORAGE_TYPE=elasticsearch
       - ES_SERVER_URLS=http://elasticsearch:9200
       - LOG_LEVEL=${JAEGER_LOG_LEVEL}
+      - COLLECTOR_OTLP_ENABLED=true
     networks:
       - go_zero_pgsql
+    deploy:
+      resources:
+        limits:
+          cpus: '0.8'
+          memory: 500M
+        reservations:
+          cpus: '0.05'
+          memory: 200M
     depends_on:
       - elasticsearch
   #搜集kafka业务日志、存储 prometheus 监控数据 - Kafka for collecting business logs and storing Prometheus monitoring data

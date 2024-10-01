@@ -1,55 +1,30 @@
 package handler
 
 import (
-	"errors"
-	translations "github.com/go-playground/validator/v10/translations/zh"
-	"go_zero_pgsql/common/errorx"
-	"net/http"
-	"reflect"
-
-	"github.com/zeromicro/go-zero/rest/httpx"
 	"go_zero_pgsql/app/user_center/cmd/api/internal/logic"
 	"go_zero_pgsql/app/user_center/cmd/api/internal/svc"
 	"go_zero_pgsql/app/user_center/cmd/api/internal/types"
 
-	"github.com/go-playground/locales/zh"
-	ut "github.com/go-playground/universal-translator"
-	"github.com/go-playground/validator/v10"
-	xhttp "github.com/zeromicro/x/http"
+	"github.com/zeromicro/go-zero/rest/httpx"
+	"net/http"
 )
 
 // 登录
 func LoginHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var req types.LoginRequest
-		if err := httpx.Parse(r, &req); err != nil {
-			httpx.Error(w, errorx.NewHandlerError(errorx.ParamErrorCode, err.Error()))
+		if err := httpx.Parse(r, &req, true); err != nil {
+			httpx.ErrorCtx(r.Context(), w, err)
 			return
-		}
-
-		validate := validator.New()
-		validate.RegisterTagNameFunc(func(fld reflect.StructField) string {
-			name := fld.Tag.Get("label")
-			return name
-		})
-
-		trans, _ := ut.New(zh.New()).GetTranslator("zh")
-		validateErr := translations.RegisterDefaultTranslations(validate, trans)
-		if validateErr = validate.StructCtx(r.Context(), req); validateErr != nil {
-			for _, err := range validateErr.(validator.ValidationErrors) {
-				httpx.Error(w, errorx.NewHandlerError(errorx.ParamErrorCode, errors.New(err.Translate(trans)).Error()))
-				return
-			}
 		}
 
 		l := logic.NewLoginLogic(r.Context(), svcCtx)
 		resp, err := l.Login(&req)
 		if err != nil {
-			// code-data 响应格式
-			xhttp.JsonBaseResponseCtx(r.Context(), w, err)
+			err = svcCtx.Trans.TransError(r.Context(), err)
+			httpx.ErrorCtx(r.Context(), w, err)
 		} else {
-			// code-data 响应格式
-			xhttp.JsonBaseResponseCtx(r.Context(), w, resp)
+			httpx.OkJsonCtx(r.Context(), w, resp)
 		}
 	}
 }

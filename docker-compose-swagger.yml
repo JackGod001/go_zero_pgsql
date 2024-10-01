@@ -1,3 +1,6 @@
+networks:
+  go_zero_pgsql:
+    driver: bridge
 services:
   swagger-ui:
     image: swaggerapi/swagger-ui
@@ -11,3 +14,5 @@ services:
       #      用于在同一个域名下访问 swagger，也可以不写，那么就是
       BASE_URL: /swaggerapi
       EMBEDDING: true
+    networks:
+      - go_zero_pgsql

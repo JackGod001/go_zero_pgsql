@@ -11,7 +11,7 @@ type (
         // 用户登录
     LoginRequest {
         Email string `json:"email"     validate:"email"         label:"邮箱"`
-        Password string `json:"password"  validate:"min=6,max=12"  label:"密码"`
+        Password string `json:"password"  validate:"required,min=6,max=12"  label:"密码"`
     }
     LoginResponse {
         JwtAuth
@@ -19,7 +19,7 @@ type (
         // 用户注册
     RegisterRequest {
         Email string `json:"email"     validate:"email"         label:"邮箱"`
-        Password string `json:"password"  validate:"min=6,max=12"  label:"密码"`
+        Password string `json:"password"  validate:"required,min=6,max=12"  label:"密码"`
     }
     RegisterResponse {
         Id int64 `json:"id"`
@@ -34,14 +34,14 @@ type (
         // 重置密码
     ResetPasswordRequest {
         Email string `json:"email"     validate:"email"         label:"邮箱"`
-        Password string `json:"password"  validate:"min=6,max=12"  label:"密码"`
-        Code string `json:"code"      validate:"min=6,max=6"   label:"验证码"`
+        Password string `json:"password"  validate:"required,min=6,max=12"  label:"密码"`
+        Code string `json:"code"      validate:"required,min=6,max=6"   label:"验证码"`
     }
         //	 修改密码
     UpdatePasswordRequest {
         Email string `json:"email"     validate:"email"         label:"邮箱"`
-        OldPassword string `json:"oldPassword"  validate:"min=6,max=12"  label:"旧密码"`
-        NewPassword string `json:"newPassword"  validate:"min=6,max=12"  label:"新密码"`
+        OldPassword string `json:"oldPassword"  validate:"required,min=6,max=12"  label:"旧密码"`
+        NewPassword string `json:"newPassword"  validate:"required,min=6,max=12"  label:"新密码"`
     }
 
         // 重置密码响应
@@ -57,10 +57,18 @@ type (
     RefreshTokenResponse {
         JwtAuth
     }
+        // 用户登录
+    TestGetUserInfoRequest {
+        // 验证
+        Id int64 `json:"id" validate:"required,gt=10" label:"用户id"`
+        // 非必填，如果有则验证
+        NoId int64 `json:"Noid" validate:"gt=10" label:"非必要用户id"`
+    }
 )
 @server(
     prefix: uapi/v1
     timeout: 3000s
+    middleware: I18n
 )
 service user-api {
     @doc(
@@ -86,6 +94,12 @@ service user-api {
     )
     @handler ResetPassword
     post /user/reset/password (ResetPasswordRequest) returns (ResetPasswordResponse)
+
+    @doc(
+        summary: "获取用户信息测试"
+    )
+    @handler TestUserInfo
+    post /user/info (TestGetUserInfoRequest) returns (UserInfoResponse)
 }
 
 type (
@@ -100,14 +114,15 @@ type (
 @server(
     prefix: uapi/v1
     timeout: 3000s
-    jwt: JwtAuth
+    jwt: Auth
+    middleware: I18n
 )
 service user-api {
     @doc(
         summary: "获取用户信息"
     )
     @handler UserInfo
-    post /user/userinfo  returns (UserInfoResponse)
+    get /user/userinfo  returns (UserInfoResponse)
 
     @doc(
         summary: "修改密码"

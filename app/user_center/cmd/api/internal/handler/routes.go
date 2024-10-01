@@ -14,52 +14,64 @@ import (
 
 func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 	server.AddRoutes(
-		[]rest.Route{
-			{
-				// 忘记密码获取验证码
-				Method:  http.MethodPost,
-				Path:    "/user/forget/code",
-				Handler: GetForgetPasswordCdoeRequestHandler(serverCtx),
-			},
-			{
-				// 登录
-				Method:  http.MethodPost,
-				Path:    "/user/login",
-				Handler: LoginHandler(serverCtx),
-			},
-			{
-				// 注册
-				Method:  http.MethodPost,
-				Path:    "/user/register",
-				Handler: RegisterHandler(serverCtx),
-			},
-			{
-				// 重置密码
-				Method:  http.MethodPost,
-				Path:    "/user/reset/password",
-				Handler: ResetPasswordHandler(serverCtx),
-			},
-		},
+		rest.WithMiddlewares(
+			[]rest.Middleware{serverCtx.I18n},
+			[]rest.Route{
+				{
+					// 忘记密码获取验证码
+					Method:  http.MethodPost,
+					Path:    "/user/forget/code",
+					Handler: GetForgetPasswordCdoeRequestHandler(serverCtx),
+				},
+				{
+					// 获取用户信息测试
+					Method:  http.MethodPost,
+					Path:    "/user/info",
+					Handler: TestUserInfoHandler(serverCtx),
+				},
+				{
+					// 登录
+					Method:  http.MethodPost,
+					Path:    "/user/login",
+					Handler: LoginHandler(serverCtx),
+				},
+				{
+					// 注册
+					Method:  http.MethodPost,
+					Path:    "/user/register",
+					Handler: RegisterHandler(serverCtx),
+				},
+				{
+					// 重置密码
+					Method:  http.MethodPost,
+					Path:    "/user/reset/password",
+					Handler: ResetPasswordHandler(serverCtx),
+				},
+			}...,
+		),
 		rest.WithPrefix("/uapi/v1"),
 		rest.WithTimeout(3000000*time.Millisecond),
 	)
 
 	server.AddRoutes(
-		[]rest.Route{
-			{
-				// 修改密码
-				Method:  http.MethodPost,
-				Path:    "/user/update/password",
-				Handler: UpdatePasswordHandler(serverCtx),
-			},
-			{
-				// 获取用户信息
-				Method:  http.MethodPost,
-				Path:    "/user/userinfo",
-				Handler: UserInfoHandler(serverCtx),
-			},
-		},
-		rest.WithJwt(serverCtx.Config.JwtAuth.AccessSecret),
+		rest.WithMiddlewares(
+			[]rest.Middleware{serverCtx.I18n},
+			[]rest.Route{
+				{
+					// 修改密码
+					Method:  http.MethodPost,
+					Path:    "/user/update/password",
+					Handler: UpdatePasswordHandler(serverCtx),
+				},
+				{
+					// 获取用户信息
+					Method:  http.MethodGet,
+					Path:    "/user/userinfo",
+					Handler: UserInfoHandler(serverCtx),
+				},
+			}...,
+		),
+		rest.WithJwt(serverCtx.Config.Auth.AccessSecret),
 		rest.WithPrefix("/uapi/v1"),
 		rest.WithTimeout(3000000*time.Millisecond),
 	)

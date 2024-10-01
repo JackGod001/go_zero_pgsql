@@ -9,17 +9,17 @@ import (
 	"net/http"
 )
 
-// 修改密码
-func UpdatePasswordHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
+// 获取用户信息测试
+func TestUserInfoHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		var req types.UpdatePasswordRequest
+		var req types.TestGetUserInfoRequest
 		if err := httpx.Parse(r, &req, true); err != nil {
 			httpx.ErrorCtx(r.Context(), w, err)
 			return
 		}
 
-		l := logic.NewUpdatePasswordLogic(r.Context(), svcCtx)
-		resp, err := l.UpdatePassword(&req)
+		l := logic.NewTestUserInfoLogic(r.Context(), svcCtx)
+		resp, err := l.TestUserInfo(&req)
 		if err != nil {
 			err = svcCtx.Trans.TransError(r.Context(), err)
 			httpx.ErrorCtx(r.Context(), w, err)

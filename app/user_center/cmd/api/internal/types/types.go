@@ -16,7 +16,7 @@ type JwtAuth struct {
 
 type LoginRequest struct {
 	Email    string `json:"email"     validate:"email"         label:"邮箱"`
-	Password string `json:"password"  validate:"min=6,max=12"  label:"密码"`
+	Password string `json:"password"  validate:"required,min=6,max=12"  label:"密码"`
 }
 
 type LoginResponse struct {
@@ -33,7 +33,7 @@ type RefreshTokenResponse struct {
 
 type RegisterRequest struct {
 	Email    string `json:"email"     validate:"email"         label:"邮箱"`
-	Password string `json:"password"  validate:"min=6,max=12"  label:"密码"`
+	Password string `json:"password"  validate:"required,min=6,max=12"  label:"密码"`
 }
 
 type RegisterResponse struct {
@@ -43,18 +43,23 @@ type RegisterResponse struct {
 
 type ResetPasswordRequest struct {
 	Email    string `json:"email"     validate:"email"         label:"邮箱"`
-	Password string `json:"password"  validate:"min=6,max=12"  label:"密码"`
-	Code     string `json:"code"      validate:"min=6,max=6"   label:"验证码"`
+	Password string `json:"password"  validate:"required,min=6,max=12"  label:"密码"`
+	Code     string `json:"code"      validate:"required,min=6,max=6"   label:"验证码"`
 }
 
 type ResetPasswordResponse struct {
 	Success bool `json:"success"`
 }
 
+type TestGetUserInfoRequest struct {
+	Id   int64 `json:"id" validate:"required,gt=10" label:"用户id"`
+	NoId int64 `json:"Noid" validate:"gt=10" label:"非必要用户id"`
+}
+
 type UpdatePasswordRequest struct {
 	Email       string `json:"email"     validate:"email"         label:"邮箱"`
-	OldPassword string `json:"oldPassword"  validate:"min=6,max=12"  label:"旧密码"`
-	NewPassword string `json:"newPassword"  validate:"min=6,max=12"  label:"新密码"`
+	OldPassword string `json:"oldPassword"  validate:"required,min=6,max=12"  label:"旧密码"`
+	NewPassword string `json:"newPassword"  validate:"required,min=6,max=12"  label:"新密码"`
 }
 
 type UserInfoResponse struct {

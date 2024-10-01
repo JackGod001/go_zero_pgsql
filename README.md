@@ -147,6 +147,7 @@ docker compose -f docker-compose-env.yml -f docker-compose-dev.yml  up
 docker compose -f docker-compose-dev.yml -f docker-compose-env.yml down
 # 重新build 不使用缓存
 docker compose -f docker-compose-dev.yml build --no-cache
+docker compose -f docker-compose-dev.yml -f docker-compose-env.yml build --no-cache
 ```
 
 ### 线上环境
@@ -163,6 +164,8 @@ docker compose build api --no-cache
 # 启动
 docker compose  -f docker-compose.yml -f docker-compose-env.yml up -d   
 docker compose  -f docker-compose.yml -f docker-compose-env.yml stop   
+docker compose -f docker-compose.yml build --no-cache
+
 ```
 
 ## 9. 链路追踪
@@ -222,7 +225,40 @@ https://swagger.io/docs/open-source-tools/swagger-ui/usage/installation/
 [docker-compose-swagger.yml](docker-compose-swagger.yml)
 访问 http://127.0.0.1:8083/swaggerapi/
 访问特定的json  搜索框中输入 swagger/user_center.json 后面的json文件就是在 deploy/swaggerapi 目录下的
+![img_1.png](img_1.png)
+## 参考api
+https://github.com/suyuan32/simple-admin-core/tree/main/api/desc/core
+## 12. 依赖问题
+可选
+rm go.sum go.work.sum
 
+go clean -modcache
+修改 go.mod 文件
+
+主要功能：下载 go.mod 文件中列出的所有依赖项，但不会修改 go.mod 或 go.sum 文件。
+可以单独检查依赖下载问题。确保所有声明的依赖都被下载。 预先下载所有依赖，特别是在离线环境或网络受限的情况下。
+go mod download
+
+
+添加缺少的模块到 go.mod。
+删除未使用的模块。
+更新 go.sum 文件。
+go mod tidy
+
+
+验证更改：
+检查 go.mod 和 go.sum 文件，确保更改已经生效。
+如果使用了 Go 工作区（workspace），更新 go.work.sum：
+go work sync
+
+
+
+
+c. 检查冲突：
+使用 go mod graph | grep <module-name> 来查看依赖关系图，找出可能的冲突。
+在修改 go.mod 后，运行 go mod why <module> 来了解为什么需要某个特定版本。
+使用 go list -m all 查看所有依赖的实际版本。
+考虑项目的整体依赖结构，而不仅仅是单个模块的版本。
 
 ## todo
 定义的 error 常量对应的文字怎么根据不同地区用户显示不同的语言文字?

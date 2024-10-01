@@ -38,8 +38,7 @@ Telemetry:
   Name: user_center_api
   Endpoint: http://jaeger:14268/api/traces
   Sampler: 1.0
-  Batcher: jaeger
-
+  Batcher: otlpgrpc # grpc
 # jwt 登陆
 Auth:
   AccessSecret: uOvKLmVfztaXGpNYd4Z0I1SiT7MwEJhl
@@ -47,3 +46,6 @@ Auth:
 
 # 用于密码加密的盐
 Salt: HWVOFkGgPTryZICwd7qnJaZR9KQ2i8xe
+
+I18nConf:
+  Dir:

@@ -43,7 +43,7 @@ services:  # 定义服务
       - postgres  # 依赖于 postgres 服务
       - redis
     #   在运行时会覆盖Dockerfile中写的CMD代码
-    command: /bin/sh -c "pwd && echo 'Current directory contents:' && ls -la && echo 'Executing modd:' && modd"
+    command: /bin/sh -c "  echo 'Executing modd:' && modd"
 
   gateway:  # Nginx 网关服务配置
     image: nginx:1.21.5  # 使用 Nginx 1.21.5 版本的官方镜像
@@ -60,7 +60,7 @@ services:  # 定义服务
       - go_zero_pgsql
     depends_on:
 #      必须依赖于api服务,否则会报错502
-      - api
+      - uapi
 
   redis:
     extends:

@@ -1,5 +1,5 @@
 # 第一阶段：构建阶段
-FROM golang:1.22.6-alpine AS builder
+FROM golang:1.23.0-alpine AS builder
 
 # 标记这个阶段的名称为 gobuilder
 LABEL stage=gobuilder
@@ -20,6 +20,8 @@ WORKDIR /build
 # 复制 go.mod 和 go.sum 文件到容器的当前工作目录（/build）
 ADD go.mod .
 ADD go.sum .
+
+RUN ls -l
 
 # 下载依赖
 RUN go mod download
