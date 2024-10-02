@@ -85,53 +85,24 @@ func (l *Translator) TransError(ctx context.Context, err error) error {
 	}
 
 	// 处理不同类型的错误
-	switch {
-	case errcode.IsGrpcError(err):
+	if errcode.IsGrpcError(err) {
 		// 处理gRPC错误
-		return status.Error(status.Code(err), localizeMessage(strings.Split(err.Error(), "desc = ")[1]))
-	case err != nil:
-		// 处理CodeError、ApiError和其他错误
-		switch typedErr := err.(type) {
-		case *errorx.CodeError:
-			return errorx.NewCodeError(typedErr.Code, localizeMessage(typedErr.Error()))
-		case *errorx.ApiError:
-			return errorx.NewApiError(typedErr.Code, localizeMessage(typedErr.Error()))
-		default:
-			// 处理其他类型的错误
-			return errorx.NewApiError(http.StatusInternalServerError, err.Error())
+		parts := strings.Split(err.Error(), "desc = ")
+		if len(parts) > 1 {
+			return status.Error(status.Code(err), localizeMessage(parts[1]))
 		}
-
-	default:
-		// 处理 err 为 nil 的情况
-		return nil
+		// 如果错误信息不符合预期格式，则返回原始错误信息
+		return status.Error(status.Code(err), localizeMessage(err.Error()))
+	} else if codeErr, ok := err.(*errorx.CodeError); ok {
+		return errorx.NewCodeError(codeErr.Code, localizeMessage(codeErr.Error()))
+	} else if apiErr, ok := err.(*errorx.ApiError); ok {
+		return errorx.NewApiError(apiErr.Code, localizeMessage(apiErr.Error()))
+	} else {
+		// 处理其他类型的错误
+		return errorx.NewApiError(http.StatusInternalServerError, err.Error())
 	}
-}
 
-// TransError translates the error message
-//func (l *Translator) TransError(ctx context.Context, err error) error {
-//	lang := ctx.Value("lang").(string)
-//	if errcode.IsGrpcError(err) {
-//		message, e := l.MatchLocalizer(lang).LocalizeMessage(&i18n.Message{ID: strings.Split(err.Error(), "desc = ")[1]})
-//		if e != nil || message == "" {
-//			message = err.Error()
-//		}
-//		return status.Error(status.Code(err), message)
-//	} else if codeErr, ok := err.(*errorx.CodeError); ok {
-//		message, e := l.MatchLocalizer(lang).LocalizeMessage(&i18n.Message{ID: codeErr.Error()})
-//		if e != nil || message == "" {
-//			message = codeErr.Error()
-//		}
-//		return errorx.NewCodeError(codeErr.Code, message)
-//	} else if apiErr, ok := err.(*errorx.ApiError); ok {
-//		message, e := l.MatchLocalizer(lang).LocalizeMessage(&i18n.Message{ID: apiErr.Error()})
-//		if e != nil {
-//			message = apiErr.Error()
-//		}
-//		return errorx.NewApiError(apiErr.Code, message)
-//	} else {
-//		return errorx.NewApiError(http.StatusInternalServerError, err.Error())
-//	}
-//}
+}
 
 // MatchLocalizer used to matcher the localizer in map
 func (l *Translator) MatchLocalizer(lang string) *i18n.Localizer {

@@ -6,6 +6,7 @@ import (
 	"go_zero_pgsql/app/user_center/cmd/api/internal/types"
 
 	"github.com/zeromicro/go-zero/rest/httpx"
+	xhttp "github.com/zeromicro/x/http"
 	"net/http"
 )
 
@@ -24,7 +25,7 @@ func GetForgetPasswordCdoeRequestHandler(svcCtx *svc.ServiceContext) http.Handle
 			err = svcCtx.Trans.TransError(r.Context(), err)
 			httpx.ErrorCtx(r.Context(), w, err)
 		} else {
-			httpx.OkJsonCtx(r.Context(), w, nil)
+			xhttp.JsonBaseResponseCtx(r.Context(), w, nil)
 		}
 	}
 }
