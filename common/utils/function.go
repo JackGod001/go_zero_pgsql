@@ -3,9 +3,10 @@ package utils
 import (
 	"context"
 	"crypto/md5"
-	"encoding/json"
 	"fmt"
 	"go_zero_pgsql/common/globalkey"
+
+	"github.com/casdoor/casdoor-go-sdk/casdoorsdk"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -17,18 +18,18 @@ func MD5(str string) string {
 }
 
 // 常规 jwt 中设置的用户id 是int64
-func GetUserId(ctx context.Context) int64 {
-	var uid int64
-	if jsonUid, ok := ctx.Value(globalkey.SysJwtUserId).(json.Number); ok {
-		if int64Uid, err := jsonUid.Int64(); err == nil {
-			uid = int64Uid
-		} else {
-			logx.WithContext(ctx).Errorf("GetUidFromCtx err : %+v", err)
-		}
-	}
-
-	return uid
-}
+//func GetUserId(ctx context.Context) int64 {
+//	var uid int64
+//	if jsonUid, ok := ctx.Value(globalkey.SysJwtUserId).(json.Number); ok {
+//		if int64Uid, err := jsonUid.Int64(); err == nil {
+//			uid = int64Uid
+//		} else {
+//			logx.WithContext(ctx).Errorf("GetUidFromCtx err : %+v", err)
+//		}
+//	}
+//
+//	return uid
+//}
 
 // casdoor id 是string uuid 36位长度的字符串
 //
@@ -39,13 +40,21 @@ func GetUserId(ctx context.Context) int64 {
 //		}
 //		return uid
 //	}
-//func GetCasdoorUser(ctx context.Context, CasdoorClient *casdoorsdk.Client) (*casdoorsdk.User, error) {
-//	user, err := CasdoorClient.GetUserByUserId(GetUserId(ctx))
-//	if err != nil {
-//		return nil, err
-//	}
-//	return user, nil
-//}
+func GetCasdoorUserId(ctx context.Context) string {
+	var uid string
+	if jsonUid, ok := ctx.Value(globalkey.SysJwtUserId).(string); ok {
+		uid = jsonUid
+	}
+	return uid
+}
+
+func GetCasdoorUser(ctx context.Context, CasdoorClient *casdoorsdk.Client) (*casdoorsdk.User, error) {
+	user, err := CasdoorClient.GetUserByUserId(GetCasdoorUserId(ctx))
+	if err != nil {
+		return nil, err
+	}
+	return user, nil
+}
 
 func ArrayUniqueValue[T any](arr []T) []T {
 	size := len(arr)

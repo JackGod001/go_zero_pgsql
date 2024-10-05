@@ -15,10 +15,70 @@
     "application/json"
   ],
   "paths": {
-    "/uapi/v1/user/forget/code": {
+    "/uapi/v1/info": {
+      "get": {
+        "summary": "获取用户详细信息",
+        "operationId": "getUserInfo",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/UserInfoResp"
+            }
+          }
+        },
+        "tags": [
+          "userCasdoor"
+        ]
+      }
+    },
+    "/uapi/v1/login": {
       "post": {
-        "summary": "忘记密码获取验证码",
-        "operationId": "GetForgetPasswordCdoeRequest",
+        "summary": "用户登录，根据casdoor的code,state换取jwt token",
+        "operationId": "loginByCasdoor",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/GetTokenByCodeResp"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "description": "登陆时获取token的请求参数",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/GetTokenByCodeReq"
+            }
+          }
+        ],
+        "tags": [
+          "userCasdoor"
+        ]
+      }
+    },
+    "/uapi/v1/logout": {
+      "post": {
+        "summary": "退出",
+        "operationId": "Logout",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {}
+          }
+        },
+        "tags": [
+          "userCasdoor"
+        ]
+      }
+    },
+    "/uapi/v1/password/update": {
+      "post": {
+        "summary": "修改密码",
+        "operationId": "updateUserPassword",
         "responses": {
           "200": {
             "description": "A successful response.",
@@ -28,392 +88,118 @@
         "parameters": [
           {
             "name": "body",
-            "description": "忘记密码获取邮箱验证码",
             "in": "body",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/GetForgetPasswordCdoeRequest"
+              "$ref": "#/definitions/UpdatePasswordReq"
             }
           }
         ],
         "tags": [
-          "user-api"
+          "userCasdoor"
         ]
       }
     },
-    "/uapi/v1/user/info": {
-      "post": {
-        "summary": "获取用户信息测试",
-        "operationId": "TestUserInfo",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/UserInfoResponse"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "body",
-            "description": " 用户登录",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/TestGetUserInfoRequest"
-            }
-          }
-        ],
-        "tags": [
-          "user-api"
-        ]
-      }
-    },
-    "/uapi/v1/user/login": {
-      "post": {
-        "summary": "登录",
-        "operationId": "Login",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/LoginResponse"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "body",
-            "description": " 用户登录",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/LoginRequest"
-            }
-          }
-        ],
-        "tags": [
-          "user-api"
-        ]
-      }
-    },
-    "/uapi/v1/user/register": {
-      "post": {
-        "summary": "注册",
-        "operationId": "Register",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/RegisterResponse"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "body",
-            "description": " 用户注册",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/RegisterRequest"
-            }
-          }
-        ],
-        "tags": [
-          "user-api"
-        ]
-      }
-    },
-    "/uapi/v1/user/reset/password": {
-      "post": {
-        "summary": "重置密码",
-        "operationId": "ResetPassword",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/ResetPasswordResponse"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "body",
-            "description": " 重置密码",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/ResetPasswordRequest"
-            }
-          }
-        ],
-        "tags": [
-          "user-api"
-        ]
-      }
-    },
-    "/uapi/v1/user/update/password": {
-      "post": {
-        "summary": "修改密码",
-        "operationId": "UpdatePassword",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/ResetPasswordResponse"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "body",
-            "description": "\t 修改密码",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/UpdatePasswordRequest"
-            }
-          }
-        ],
-        "tags": [
-          "user-api"
-        ],
-        "security": [
-          {
-            "apiKey": []
-          }
-        ]
-      }
-    },
-    "/uapi/v1/user/userinfo": {
+    "/uapi/v1/profile/info": {
       "get": {
-        "summary": "获取用户信息",
-        "operationId": "UserInfo",
+        "summary": "登录信息，用于基础时直接获取的用户基础信息",
+        "operationId": "getUserProfileInfo",
         "responses": {
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/UserInfoResponse"
+              "$ref": "#/definitions/UserProfileInfoResp"
             }
           }
         },
         "tags": [
-          "user-api"
-        ],
-        "security": [
-          {
-            "apiKey": []
+          "userCasdoor"
+        ]
+      }
+    },
+    "/uapi/v1/token/refresh": {
+      "post": {
+        "summary": "刷新token",
+        "operationId": "refreshToken",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/GetTokenByCodeResp"
+            }
           }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "description": "刷新token的请求参数",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/RefreshTokenReq"
+            }
+          }
+        ],
+        "tags": [
+          "userCasdoor"
         ]
       }
     }
   },
   "definitions": {
-    "GetForgetPasswordCdoeRequest": {
+    "GetTokenByCodeReq": {
       "type": "object",
       "properties": {
-        "email": {
-          "type": "string"
-        }
-      },
-      "title": "GetForgetPasswordCdoeRequest",
-      "required": [
-        "email",
-        "邮箱"
-      ]
-    },
-    "JwtAuth": {
-      "type": "object",
-      "properties": {
-        "accessSecret": {
-          "type": "string"
-        },
-        "accessExpire": {
-          "type": "integer",
-          "format": "int64"
-        },
-        "refresh_token": {
-          "type": "string"
-        },
-        "expires_at": {
-          "type": "integer",
-          "format": "int64"
-        }
-      },
-      "title": "JwtAuth",
-      "required": [
-        "accessSecret",
-        "accessExpire"
-      ]
-    },
-    "LoginRequest": {
-      "type": "object",
-      "properties": {
-        "email": {
-          "type": "string"
-        },
-        "password": {
-          "type": "string"
-        }
-      },
-      "title": "LoginRequest",
-      "required": [
-        "email",
-        "邮箱",
-        "password",
-        "密码"
-      ]
-    },
-    "LoginResponse": {
-      "type": "object",
-      "properties": {
-        "accessSecret": {
-          "type": "string"
-        },
-        "accessExpire": {
-          "type": "integer",
-          "format": "int64"
-        },
-        "refresh_token": {
-          "type": "string"
-        },
-        "expires_at": {
-          "type": "integer",
-          "format": "int64"
-        }
-      },
-      "title": "LoginResponse"
-    },
-    "RefreshTokenRequest": {
-      "type": "object",
-      "properties": {
-        "refreshToken": {
-          "type": "string"
-        }
-      },
-      "title": "RefreshTokenRequest",
-      "required": [
-        "refreshToken"
-      ]
-    },
-    "RefreshTokenResponse": {
-      "type": "object",
-      "properties": {
-        "accessSecret": {
-          "type": "string"
-        },
-        "accessExpire": {
-          "type": "integer",
-          "format": "int64"
-        },
-        "refresh_token": {
-          "type": "string"
-        },
-        "expires_at": {
-          "type": "integer",
-          "format": "int64"
-        }
-      },
-      "title": "RefreshTokenResponse"
-    },
-    "RegisterRequest": {
-      "type": "object",
-      "properties": {
-        "email": {
-          "type": "string"
-        },
-        "password": {
-          "type": "string"
-        }
-      },
-      "title": "RegisterRequest",
-      "required": [
-        "email",
-        "邮箱",
-        "password",
-        "密码"
-      ]
-    },
-    "RegisterResponse": {
-      "type": "object",
-      "properties": {
-        "id": {
-          "type": "integer",
-          "format": "int64"
-        },
-        "email": {
-          "type": "string"
-        }
-      },
-      "title": "RegisterResponse",
-      "required": [
-        "id",
-        "email"
-      ]
-    },
-    "ResetPasswordRequest": {
-      "type": "object",
-      "properties": {
-        "email": {
-          "type": "string"
-        },
-        "password": {
-          "type": "string"
-        },
         "code": {
           "type": "string"
-        }
-      },
-      "title": "ResetPasswordRequest",
-      "required": [
-        "email",
-        "邮箱",
-        "password",
-        "密码",
-        "code",
-        "验证码"
-      ]
-    },
-    "ResetPasswordResponse": {
-      "type": "object",
-      "properties": {
-        "success": {
-          "type": "boolean",
-          "format": "boolean"
-        }
-      },
-      "title": "ResetPasswordResponse",
-      "required": [
-        "success"
-      ]
-    },
-    "TestGetUserInfoRequest": {
-      "type": "object",
-      "properties": {
-        "id": {
-          "type": "integer",
-          "format": "int64"
         },
-        "Noid": {
-          "type": "integer",
-          "format": "int64"
+        "state": {
+          "type": "string"
         }
       },
-      "title": "TestGetUserInfoRequest",
+      "title": "GetTokenByCodeReq",
       "required": [
-        "id",
-        "用户id",
-        "Noid",
-        "非必要用户id"
+        "code",
+        "state"
       ]
     },
-    "UpdatePasswordRequest": {
+    "GetTokenByCodeResp": {
       "type": "object",
       "properties": {
-        "email": {
+        "access_token": {
           "type": "string"
         },
+        "token_type": {
+          "type": "string"
+        },
+        "refresh_token": {
+          "type": "string"
+        },
+        "expires_at": {
+          "type": "integer",
+          "format": "int64"
+        }
+      },
+      "title": "GetTokenByCodeResp",
+      "required": [
+        "access_token"
+      ]
+    },
+    "RefreshTokenReq": {
+      "type": "object",
+      "properties": {
+        "refresh_token": {
+          "type": "string"
+        }
+      },
+      "title": "RefreshTokenReq",
+      "required": [
+        "refresh_token"
+      ]
+    },
+    "UpdatePasswordReq": {
+      "type": "object",
+      "properties": {
         "oldPassword": {
           "type": "string"
         },
@@ -421,31 +207,52 @@
           "type": "string"
         }
       },
-      "title": "UpdatePasswordRequest",
+      "title": "UpdatePasswordReq",
       "required": [
-        "email",
-        "邮箱",
         "oldPassword",
         "旧密码",
         "newPassword",
         "新密码"
       ]
     },
-    "UserInfoResponse": {
+    "UserInfoResp": {
       "type": "object",
       "properties": {
-        "id": {
-          "type": "integer",
-          "format": "int64"
+        "nickname": {
+          "type": "string"
         },
-        "email": {
+        "username": {
+          "type": "string"
+        },
+        "avatar": {
           "type": "string"
         }
       },
-      "title": "UserInfoResponse",
+      "title": "UserInfoResp",
+      "required": [
+        "nickname",
+        "username",
+        "avatar"
+      ]
+    },
+    "UserProfileInfoResp": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "nickname": {
+          "type": "string"
+        },
+        "avatar": {
+          "type": "string"
+        }
+      },
+      "title": "UserProfileInfoResp",
       "required": [
         "id",
-        "email"
+        "nickname",
+        "avatar"
       ]
     }
   },

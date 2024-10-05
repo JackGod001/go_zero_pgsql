@@ -13,6 +13,7 @@ services:  # 定义服务
     container_name: ${APP_NAME}_api_dev  # 设置容器名称,使用环境变量 APP_NAME
     environment:  # 设置环境变量
       - TZ=Asia/Shanghai  # 设置时区为上海
+      - PROJECT_ROOT=./
       - GOPROXY=https://goproxy.cn,direct  # 设置 Go 代理
       - DEBUG_SERVICE_PATH=/go/go_zero_dashboard_base/data/server  # 设置调试服务路径
       - DB_HOST=postgres  # 设置数据库主机为 postgres 服务

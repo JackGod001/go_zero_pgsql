@@ -68,6 +68,7 @@ type (
 @server(
     prefix: uapi/v1
     timeout: 3000s
+    group: user
     middleware: I18n
 )
 service user-api {
@@ -114,7 +115,9 @@ type (
 @server(
     prefix: uapi/v1
     timeout: 3000s
+    // 使用go-zero 的内置 auth 认证中间件，需要在配置中配置 Auth
     jwt: Auth
+    group: user
     middleware: I18n
 )
 service user-api {
@@ -130,3 +133,7 @@ service user-api {
     @handler UpdatePassword
     post /user/update/password (UpdatePasswordRequest) returns (ResetPasswordResponse)
 }
+
+
+
+

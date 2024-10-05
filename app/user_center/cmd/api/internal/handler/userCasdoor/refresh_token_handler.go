@@ -1,7 +1,7 @@
-package handler
+package userCasdoor
 
 import (
-	"go_zero_pgsql/app/user_center/cmd/api/internal/logic"
+	"go_zero_pgsql/app/user_center/cmd/api/internal/logic/userCasdoor"
 	"go_zero_pgsql/app/user_center/cmd/api/internal/svc"
 	"go_zero_pgsql/app/user_center/cmd/api/internal/types"
 
@@ -10,17 +10,17 @@ import (
 	"net/http"
 )
 
-// 重置密码
-func ResetPasswordHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
+// 刷新token
+func RefreshTokenHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		var req types.ResetPasswordRequest
+		var req types.RefreshTokenReq
 		if err := httpx.Parse(r, &req, true); err != nil {
 			httpx.ErrorCtx(r.Context(), w, err)
 			return
 		}
 
-		l := logic.NewResetPasswordLogic(r.Context(), svcCtx)
-		resp, err := l.ResetPassword(&req)
+		l := userCasdoor.NewRefreshTokenLogic(r.Context(), svcCtx)
+		resp, err := l.RefreshToken(&req)
 		if err != nil {
 			err = svcCtx.Trans.TransError(r.Context(), err)
 			httpx.ErrorCtx(r.Context(), w, err)

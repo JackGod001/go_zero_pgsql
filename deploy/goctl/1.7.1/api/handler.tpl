@@ -3,8 +3,9 @@ package {{.PkgName}}
 import (
 	{{.ImportPackages}}
 	"net/http"
-	{{if .HasRequest}}"github.com/zeromicro/go-zero/rest/httpx"{{end}}
     xhttp "github.com/zeromicro/x/http"
+	"github.com/zeromicro/go-zero/rest/httpx"
+
 )
 
 {{if .HasDoc}}{{.Doc}}{{end}}

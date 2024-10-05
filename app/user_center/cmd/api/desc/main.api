@@ -10,6 +10,7 @@ info (
 
 import (
 	// 用户api
-	"user/user.api"
+	// "user/user.api"
+	"user/user_casdoor.api"
 )
 

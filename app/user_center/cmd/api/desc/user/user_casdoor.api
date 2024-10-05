@@ -1,0 +1,109 @@
+syntax = "v1"
+info(
+    title: "User Center"
+    desc: ""
+    author: ""
+    email: ""
+    version: "v1"
+)
+type (
+    //登陆时获取token的请求参数
+    GetTokenByCodeReq {
+        Code string `json:"code"  label:"code"`
+        State string `json:"state"  label:"state"`
+    }
+
+        //登陆时获取token的响应参数,刷新token的响应参数 返回参数的json字段命名 是根据nextauth.js 中的配置文件来命名的
+    GetTokenByCodeResp {
+        AccessToken string `json:"access_token"`
+        TokenType string `json:"token_type,omitempty"`
+        // RefreshToken 是应用程序（而不是用户）使用的令牌，用于在访问令牌过期时刷新该令牌
+        RefreshToken string `json:"refresh_token,omitempty"`
+        // 如果为零，TokenSource 实现将永远重用相同的令牌，并且不会使用该 TokenSource 的 RefreshToken 或等效的机制。
+        ExpiresAt int64 `json:"expires_at,omitempty"`
+    }
+)
+
+//  =============== casdoor单点登陆 ===============
+@server(
+    prefix: uapi/v1
+    group: userCasdoor
+    // todo postman 接口调试时 debug 方便查错
+    timeout: 3000s
+    middleware: I18n
+)
+service user-api {
+    // 注册在casdoor服务中，这里只有登录
+    @doc (
+        summary: "用户登录，根据casdoor的code,state换取jwt token"
+    )
+    @handler loginByCasdoor
+    post /login (GetTokenByCodeReq) returns (GetTokenByCodeResp)
+}
+
+type (
+    UserInfoResp {
+        Nickname string `json:"nickname"`
+        Username string `json:"username"`
+        Avatar string `json:"avatar"`
+    }
+    UserProfileInfoResp {
+        Id string `json:"id"`
+        //		Username string `json:"username"`
+        Nickname string `json:"nickname"`
+        //		Gender   int64  `json:"gender"`
+        //		Email    string `json:"email"`
+        //		Mobile   string `json:"mobile"`
+        //		Remark   string `json:"remark"`
+        Avatar string `json:"avatar"`
+    }
+    UpdatePasswordReq {
+        OldPassword string `json:"oldPassword"  validate:"required,min=6,max=12"  label:"旧密码"`
+        NewPassword string `json:"newPassword"  validate:"required,min=6,max=12"  label:"新密码"`
+    }
+        //刷新token的请求参数
+    RefreshTokenReq {
+        //    必填
+        RefreshToken string `json:"refresh_token"  validate:"required"  label:"refresh_token"`
+    }
+)
+@server(
+    prefix: uapi/v1
+    group: userCasdoor
+    // todo postman 接口调试时 debug 方便查错
+    timeout: 3000s
+    //    这里中间件jwt验证放到 serviceContext.go 初始化中了,应为要加载casdoor的相关配置, 实际处理代码在 authMiddleware.go
+    middleware: I18n,CasdoorJwtMiddleware
+)
+service user-api {
+    @doc(
+        summary: "获取用户详细信息"
+    )
+    // 小驼峰命名
+    @handler getUserInfo
+    get /info returns (UserInfoResp)
+
+    @doc(
+        summary: "登录信息，用于基础时直接获取的用户基础信息"
+    )
+    @handler getUserProfileInfo
+    get /profile/info returns (UserProfileInfoResp)
+
+    @doc(
+        summary: "刷新token"
+    )
+    @handler refreshToken
+    post /token/refresh (RefreshTokenReq) returns (GetTokenByCodeResp)
+
+    @doc(
+        summary: "修改密码"
+    )
+    @handler updateUserPassword
+    post /password/update (UpdatePasswordReq)
+    @doc(
+        summary: "退出"
+    )
+    @handler Logout
+    post /logout
+}
+//  =============== casdoor单点登陆 ===============
