@@ -7,7 +7,6 @@ import (
 	"go_zero_pgsql/common/globalkey"
 	"net/http"
 	"strings"
-	"time"
 
 	"github.com/casdoor/casdoor-go-sdk/casdoorsdk"
 	"github.com/golang-jwt/jwt/v4"
@@ -50,7 +49,8 @@ func (m *CasdoorJwtMiddleware) Handle(next http.HandlerFunc) http.HandlerFunc {
 			httpx.Error(w, errorx.NewApiErrorWithoutMsg(http.StatusUnauthorized))
 			return
 		}
-		time.Sleep(500 * time.Millisecond)
+		// 有时与服务器时间不同步会导致token解析失败，优先同步时间
+		//time.Sleep(500 * time.Millisecond)
 		claims, err := m.casdoorsdk.ParseJwtToken(token[1])
 		if err != nil {
 			httpx.Error(w, errorx.NewApiErrorWithoutMsg(http.StatusUnauthorized))

@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"time"
 
+	userCasdoor "go_zero_pgsql/app/user_center/cmd/api/internal/handler/userCasdoor"
 	"go_zero_pgsql/app/user_center/cmd/api/internal/svc"
 
 	"github.com/zeromicro/go-zero/rest"
@@ -18,34 +19,10 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 			[]rest.Middleware{serverCtx.I18n},
 			[]rest.Route{
 				{
-					// 忘记密码获取验证码
+					// 用户登录，根据casdoor的code,state换取jwt token
 					Method:  http.MethodPost,
-					Path:    "/user/forget/code",
-					Handler: GetForgetPasswordCdoeRequestHandler(serverCtx),
-				},
-				{
-					// 获取用户信息测试
-					Method:  http.MethodPost,
-					Path:    "/user/info",
-					Handler: TestUserInfoHandler(serverCtx),
-				},
-				{
-					// 登录
-					Method:  http.MethodPost,
-					Path:    "/user/login",
-					Handler: LoginHandler(serverCtx),
-				},
-				{
-					// 注册
-					Method:  http.MethodPost,
-					Path:    "/user/register",
-					Handler: RegisterHandler(serverCtx),
-				},
-				{
-					// 重置密码
-					Method:  http.MethodPost,
-					Path:    "/user/reset/password",
-					Handler: ResetPasswordHandler(serverCtx),
+					Path:    "/login",
+					Handler: userCasdoor.LoginByCasdoorHandler(serverCtx),
 				},
 			}...,
 		),
@@ -55,23 +32,40 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 
 	server.AddRoutes(
 		rest.WithMiddlewares(
-			[]rest.Middleware{serverCtx.I18n},
+			[]rest.Middleware{serverCtx.I18n, serverCtx.CasdoorJwtMiddleware},
 			[]rest.Route{
+				{
+					// 获取用户详细信息
+					Method:  http.MethodGet,
+					Path:    "/info",
+					Handler: userCasdoor.GetUserInfoHandler(serverCtx),
+				},
+				{
+					// 退出
+					Method:  http.MethodPost,
+					Path:    "/logout",
+					Handler: userCasdoor.LogoutHandler(serverCtx),
+				},
 				{
 					// 修改密码
 					Method:  http.MethodPost,
-					Path:    "/user/update/password",
-					Handler: UpdatePasswordHandler(serverCtx),
+					Path:    "/password/update",
+					Handler: userCasdoor.UpdateUserPasswordHandler(serverCtx),
 				},
 				{
-					// 获取用户信息
+					// 登录信息，用于基础时直接获取的用户基础信息
 					Method:  http.MethodGet,
-					Path:    "/user/userinfo",
-					Handler: UserInfoHandler(serverCtx),
+					Path:    "/profile/info",
+					Handler: userCasdoor.GetUserProfileInfoHandler(serverCtx),
+				},
+				{
+					// 刷新token
+					Method:  http.MethodPost,
+					Path:    "/token/refresh",
+					Handler: userCasdoor.RefreshTokenHandler(serverCtx),
 				},
 			}...,
 		),
-		rest.WithJwt(serverCtx.Config.Auth.AccessSecret),
 		rest.WithPrefix("/uapi/v1"),
 		rest.WithTimeout(3000000*time.Millisecond),
 	)
