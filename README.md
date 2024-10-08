@@ -14,7 +14,7 @@ curl "http://localhost:8887/v1/user-center/user?id=1"
     - modd: 用于热加载
     - Delve: 用于调试
 3. Redis (待定): 可能会使用 Pika 作为替代
-
+4. 国际化 i18n
 ## 2. 目录架构
 
 关于 model 可以放到 rpc 的目录 internal 目录中，这样 api 就只能通过 rpc->model
@@ -261,4 +261,4 @@ c. 检查冲突：
 考虑项目的整体依赖结构，而不仅仅是单个模块的版本。
 
 ## todo
-定义的 error 常量对应的文字怎么根据不同地区用户显示不同的语言文字?
+casdoor pem文件的变量配置
