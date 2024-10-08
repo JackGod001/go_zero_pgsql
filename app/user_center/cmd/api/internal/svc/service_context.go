@@ -7,9 +7,9 @@ import (
 	"go_zero_pgsql/app/user_center/cmd/api/internal/middleware"
 	genModel "go_zero_pgsql/app/user_center/model"
 
-	"github.com/casdoor/casdoor-go-sdk/casdoorsdk"
-
 	"go_zero_pgsql/common/i18n"
+
+	"github.com/casdoor/casdoor-go-sdk/casdoorsdk"
 
 	"github.com/redis/go-redis/v9"
 	"github.com/zeromicro/go-zero/core/stores/sqlx"
@@ -24,6 +24,7 @@ type ServiceContext struct {
 	Trans                *i18n.Translator
 	CasdoorJwtMiddleware rest.Middleware
 	CasdoorClient        *casdoorsdk.Client
+	//McmsRpc              mcmsclient.Mcms
 }
 
 func NewServiceContext(c config.Config) *ServiceContext {
@@ -49,6 +50,7 @@ func NewServiceContext(c config.Config) *ServiceContext {
 		Trans:                trans,
 		CasdoorJwtMiddleware: casdoorJwtMiddleware.Handle,
 		CasdoorClient:        CasdoorClient,
+		//McmsRpc:              mcmsclient.NewMcms(zrpc.NewClientIfEnable(c.McmsRpc)),
 	}
 }
 func initCasdoorAuthConfig(c config.Config) *casdoorsdk.Client {

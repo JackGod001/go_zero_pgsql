@@ -11,6 +11,7 @@ info (
 import (
 	// 用户api
 	// "user/user.api"
+//	"base.api"
 	"user/user_casdoor.api"
 )
 
